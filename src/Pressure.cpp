@@ -1,12 +1,12 @@
 #include "Pressure.hpp"
 
-Pressure::Pressure()
-	: Sensor(){
+Pressure::Pressure(double *time)
+	: Sensor(time){
 	_contactArea = 10;
 }
 
-Pressure::Pressure(double contactArea)
-	: Pressure(){
+Pressure::Pressure(double *time, double contactArea)
+	: Pressure(time){
 	_contactArea = contactArea;
 }
 

@@ -8,12 +8,14 @@ using namespace std;
 int main(){
 	Pressure * sensor =NULL;
 	char c ='1';
-		sensor = new Pressure();
-		while(c!='d'){
-			printf("Pressure: %lf\n", sensor->getMeasure());
-			scanf("%c", &c);
-		}
-		delete sensor;
-	return 0;
+	double dtime = 10;
 
+	sensor = new Pressure(&dtime);
+	while(c!='d'){
+		printf("Pressure: %lf\n", sensor->getMeasure());
+		scanf("%c", &c);
+	}
+	delete sensor;
+	
+	return 0;
 }
