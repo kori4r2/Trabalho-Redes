@@ -1,4 +1,4 @@
-#include "../lib/Pressure.h"
+#include "Pressure.hpp"
 #include<stdio.h>
 
 // compile using : g++ main.cpp -o ./src/Sensor.o ./src/Pressure.o -o main

@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Sensor.h"
+#include "Sensor.hpp"
 #include <cstdlib>
 
 using namespace std;
 class Pressure : public Sensor{
 	private:
-		double _contactArea = 10;
+		double _contactArea;
 		double _force;
-		double _readMeasure();
+		double readMeasure() override;
 	public:
 		Pressure();
 		Pressure(double contactArea);

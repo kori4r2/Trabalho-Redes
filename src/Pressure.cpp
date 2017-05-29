@@ -1,6 +1,13 @@
-#include "../lib/Pressure.h"
+#include "Pressure.hpp"
 
-Pressure::Pressure():Sensor(){
+Pressure::Pressure()
+	: Sensor(){
+	_contactArea = 10;
+}
+
+Pressure::Pressure(double contactArea)
+	: Pressure(){
+	_contactArea = contactArea;
 }
 
 double Pressure::readMeasure(){

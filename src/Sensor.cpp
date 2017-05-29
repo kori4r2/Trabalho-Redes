@@ -1,4 +1,4 @@
-#include "../lib/Sensor.h"
+#include "Sensor.hpp"
 
 Sensor::Sensor(double *time){
 	_time = time;
