@@ -1,24 +1,20 @@
 #include "../lib/Pressure.h"
 
 Pressure::Pressure():Sensor(){
-	
 }
 
-double Pressure::readMeasure(){	
-	
+double Pressure::readMeasure(){
+
 	double deltaForce = (rand()%10); // Need something close to reality, then a small variation is better
 	
 	if(rand()%2==0) // oscilation simulator
-		Force+=deltaForce;
+		_force += deltaForce;
 	else
-		Force-=deltaForce;
+		_force -= deltaForce;
 
-	measure =  Force / ContactArea; // P = F/A 
-	return measure;
+	_measure =  _force / _contactArea; // P = F/A 
+	return _measure;
 }
 
 Pressure::~Pressure(){
-
-
-
 }
