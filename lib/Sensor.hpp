@@ -13,5 +13,5 @@ class  Sensor {
 	public:
 		Sensor(double *time);
 		double getMeasure();
-		~Sensor();
+		virtual ~Sensor(); // Must be declared as virtual
 };

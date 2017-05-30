@@ -5,6 +5,7 @@ Sensor::Sensor(double *time){
 }
 
 Sensor::~Sensor(){
+	// Nothing to destroy
 }
 
 double Sensor::getMeasure(){

@@ -16,7 +16,7 @@ int main2(){
 		printf("Pressure: %lf\n", sensor->getMeasure());
 		scanf("%c", &c);
 	}
-	delete sensor;
+	delete(sensor);
 
 	return 0;
 
