@@ -1,7 +1,6 @@
 //#include "Pressure.hpp"
 #include "ServerSocket.hpp"
 #include<stdio.h>
-#include <thread>
 
 using namespace std;
 
@@ -18,30 +17,30 @@ int main2(){
 	int size;
 
 	// Criar lista de sockets em ordem pre-definida (1 socket para cada sensor)
-	ServerSocket serv(PORTNO, N_SENSORS);
+	ServerSocket *serv = new ServerSocket(PORTNO, N_SENSORS);
 
 	// Conectar todos os sockets, em ordem
 	int i;
 
 	for(i = 0; i < N_SENSORS; i++){
-		serv.acceptClient();
+		serv->acceptClient();
 	}
 
 	// Enquanto houver ao menos um socket conectado
-	while(serv.hasClients){
+	while(serv->hasClients){
 		// 	Enviar mensagem de inicio
-		serv.broadcastMessage("send the values");
+		serv->broadcastMessage("send the values");
 		
 		// 	Iniciar um read em cada socket, com cada chamada em uma thread
 		// 	join nas threads criadas
-		serv.listenToClients(&values, &size)
+		serv->listenToClients(&values, &size)
 
 		// 	Calcular sensores virtuais de acordo com os alores recebidos
 		// 	Exibir as informacoes na tela
 	}
 
 	// Apaga toda a memoria alocada
-	delete[] serv;
+	delete serv;
 
 	return 0;
 
