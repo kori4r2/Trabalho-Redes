@@ -5,9 +5,8 @@
 
 using namespace std;
 class Altitude : public Sensor{
-	private:
-		double readMeasure();
 	public:
+		double readMeasure();
 		Altitude(double *time);
 		~Altitude();
 };

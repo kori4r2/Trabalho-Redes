@@ -3,7 +3,6 @@
 Altitude::Altitude(double *time)
 	: Sensor(time){
 	_measure = 30;
-		
 }
 
 double Altitude::readMeasure(){ 

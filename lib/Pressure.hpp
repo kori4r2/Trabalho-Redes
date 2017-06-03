@@ -8,8 +8,8 @@ class Pressure : public Sensor{
 	private:
 		double _contactArea;
 		double _force;
-		double readMeasure();
 	public:
+		double readMeasure();
 		Pressure(double *time);
 		Pressure(double *time, double contactArea);
 		~Pressure();

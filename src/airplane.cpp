@@ -4,7 +4,7 @@
 #include <thread>
 #include <vector>
 
-#define NUMBER_OF_LOOPS 1000
+#define NUMBER_OF_LOOPS 2000
 
 int main(int argc, char *argv[]){
 
@@ -18,6 +18,10 @@ int main(int argc, char *argv[]){
 	scanf("%s", serverName);
 
 	// Criar todos os sensores
+	Sensor **sensors;
+	sensors = (Sensor**)malloc(sizeof(Sensor) * N_SENSORS);
+	::initalizeSensors(sensors, &time);
+
 	// Criar todos os sockets (um para cada sensor)
 	ClientSocket *sockets;
 	sockets = (ClientSocket*)malloc(sizeof(ClientSocket) * N_SENSORS);
@@ -25,7 +29,8 @@ int main(int argc, char *argv[]){
 	for(int i = 0; i < N_SENSORS; i++)
 		sockets[i] = ClientSocket(portno, serverName);
 	// Utiliza um for para enviar um numero maximo de mensagens
-	for(int i = 0; i < NUMBER_OF_LOOPS; i++){
+	bool allGood = true;
+	for(int i = 0; i < NUMBER_OF_LOOPS && allGood; i++){
 	// 	Recebe uma mensagem do server usando a funcao read (sai do loop caso nao consiga conectar)
 		std::vector<std::thread> threads;
 		char buffer[N_SENSORS][256];
@@ -36,18 +41,28 @@ int main(int argc, char *argv[]){
 		for(int j = 0; j < N_SENSORS; j++){
 			threads[j].join();
 			if(buffer[j] == 0) // This is an error
-				exit(1); // Maybe change this to alter a bool variable that exits the loop
+				allGood = false; // Maybe change this to alter a bool variable that exits the loop
 		}
-		threads.clear();
-	// 	Envia os novos valores dos sensores utilizando a funcao write e colocando cada chamada em uma thread
-	// 	Da join em todas as threads criadas
-		time += 0.2;
+		if(allGood){
+			threads.clear();
+			// 	Envia os novos valores dos sensores utilizando a funcao write e colocando cada chamada em uma thread
+			for(int j = 0; j < N_SENSORS; j++){
+				threads.push_back(std::thread(sockets[j].sendDouble(sensors[j]->readMeasure() )));
+			}
+			// 	Da join em todas as threads criadas
+			for(int j = 0; j < N_SENSORS; j++){
+				threads[j].join();
+			}
+			time += 0.4;
+		}
 	}
 	// Desconecta caso ainda esteja conectado
 	for(int i = 0; i < N_SENSORS; i++)
 		delete &sockets[i];
 	// Apaga toda a memoria alocada
 	free(sockets);
+	::deleteSensors(sensors);
+	free(sensors);
 	
 	return 0;
 }

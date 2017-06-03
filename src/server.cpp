@@ -1,5 +1,5 @@
 #include "ServerSocket.hpp"
-#include<stdio.h>
+#include <stdio.h>
 #include <math.h>
 #include "SensorManager.hpp"
 
@@ -34,10 +34,10 @@ int main(int argc, char *argv[]){
 		serv->listenToClients(&values, &size);
 
 		// 	Calcular sensores virtuais de acordo com os alores recebidos
-		double v1 = gastoCombustivel(values[ALTITUDE1], values[], values[3]);
-		int v2 = perigoColisao(0, 0, 0, 0, 0, 0);
-		double v3 = temperaturaMediaInterna(0, 0, 0);
-		double v4 = 1;
+		double v1 = gastoCombustivel(values[ALTITUDE1], values[SPEED], values[WEIGHT]);
+		int v2 = perigoColisao(values[LATITUDE1], values[LONGITUDE1], values[ALTITUDE1], values[LATITUDE2], values[LONGITUDE2], values[ALTITUDE2]);
+		double v3 = temperaturaMediaInterna(values[TEMPERATURE1], values[TEMPERATURE2], values[TEMPERATURE3]);
+		double v4 = tempoEstimado(values[LATITUDE1], values[LONGITUDE1], values[SPEED]);
 
 		// 	Exibir as informacoes na tela
 		std::cout << "============================================" << std::endl;

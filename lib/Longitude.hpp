@@ -5,9 +5,8 @@
 
 using namespace std;
 class Longitude : public Sensor{
-	private:
-		double readMeasure();
 	public:
+		double readMeasure();
 		Longitude(double *time);
 		~Longitude();
 };

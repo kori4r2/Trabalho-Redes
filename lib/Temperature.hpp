@@ -4,12 +4,8 @@
 
 using namespace std;
 class Temperature : public Sensor{
-	private:
-	
-		double readMeasure();
 	public:
+		double readMeasure();
 		Temperature(double *time);
-
 		~Temperature();
-
 };
