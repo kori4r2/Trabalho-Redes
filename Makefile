@@ -1,17 +1,27 @@
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -std=c++11
+LINKFLAGS = -pthread -std=c++11
 PROJECT = Redes
 CC = g++
 BINDIR = bin
 SRCDIR = src
 LIBDIR = lib
+SERVER = server
+CLIENT = airplane
 LIBS := $(wildcard $(LIBDIR)/*hpp)
 SRCS := $(wildcard $(SRCDIR)/*cpp)
 OBJS := $(patsubst $(SRCDIR)/%.cpp, $(BINDIR)/%.o, $(SRCS))
+SERVEROBJS := $(filter-out $(BINDIR)/$(CLIENT).o, $(OBJS))
+CLIENTOBJS := $(filter-out $(BINDIR)/$(SERVER).o, $(OBJS))
 
-all : $(BINDIR) build
+all : build
 
-build : $(OBJS)
-	$(CC) -o $(PROJECT) $(OBJS)
+build : $(BINDIR) buildClient buildServer
+
+buildServer : $(SERVEROBJS)
+	$(CC) $(LINKFLAGS) -o $(SERVER) $(SERVEROBJS)
+
+buildClient : $(CLIENTOBJS)
+	$(CC) $(LINKFLAGS) -o $(CLIENT) $(CLIENTOBJS)
 
 $(BINDIR) :
 	mkdir -p $(BINDIR)
@@ -23,11 +33,18 @@ clean :
 	rm -f $(BINDIR)/*.o
 	rm -f $(PROJECT).zip
 	rm -f $(PROJECT)
+	rm -f $(SERVER)
+	rm -f $(CLIENT)
 	rm -f debug*.txt
 	clear
 
-run : build
-	./$(PROJECT)
+client : buildClient
+	./$(CLIENT)
+
+server : buildServer
+	./$(SERVER)
+
+run : server
 
 .zip : clean
 	zip $(PROJECT).zip $(SRCS) $(LIBS) Makefile *.pdf Authors.txt

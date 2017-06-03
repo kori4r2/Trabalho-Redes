@@ -20,7 +20,7 @@ double gastoCombustivel(double altura, double velocidade, double peso){
 	return c*(altura/(velocidade*peso));
 }
 
-int perigoColisão(double xA, double yA, double zA, double xB, double yB, double zB){
+int perigoColisao(double xA, double yA, double zA, double xB, double yB, double zB){
 	double x, y, z, dist;
 
 	x = xA - xB;
@@ -50,7 +50,7 @@ double tempoEstimado(double x, double y, double v){
 	return 1.0;
 }
 
-int main2(){
+int main(){
 	double *values = NULL;
 	int size;
 
@@ -71,24 +71,24 @@ int main2(){
 		
 		// 	Iniciar um read em cada socket, com cada chamada em uma thread
 		// 	join nas threads criadas
-		serv->listenToClients(&values, &size)
+		serv->listenToClients(&values, &size);
 
 		// 	Calcular sensores virtuais de acordo com os alores recebidos
 		double v1 = gastoCombustivel(values[1], values[2], values[3]);
-		int v2 = perigoColisão;
+		int v2 = perigoColisao;
 		double v3 = temperaturaMediaInterna;
 		double v4 = 1;
 
 		// 	Exibir as informacoes na tela
 		cout << "====================" << endl;
 		cout << "Combustivel gasto por hora: " << v1 << endl;
-		cout << "Perigo de colisão com aeronave B: ";
+		cout << "Perigo de colisao com aeronave B: ";
 		if(v2 == 0){
-			cout << "Não" << endl;
+			cout << "Nao" << endl;
 		} else {
 			cout << "Sim" << endl;
 		}
-		cout << "Temperatura média interna: " << v3 << endl;
+		cout << "Temperatura media interna: " << v3 << endl;
 		cout << "Tempo estimado de chegada: " << v4 << endl;
 		cout << "====================" << endl;
 	}
