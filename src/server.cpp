@@ -1,21 +1,7 @@
 #include "ServerSocket.hpp"
 #include<stdio.h>
 #include <math.h>
-
-#define a 0 
-#define b 1
-#define C 2
-#define d 3
-#define e 4
-#define f 5 
-#define g 6
-#define h 7
-#define p 8
-#define q 9
-#define r 10 
-#define l 11
-
-#define N_SENSORS 12
+#include "SensorManager.hpp"
 
 void error(const char *msg);
 double gastoCombustivel(double altura, double velocidade, double peso);
@@ -48,7 +34,7 @@ int main(int argc, char *argv[]){
 		serv->listenToClients(&values, &size);
 
 		// 	Calcular sensores virtuais de acordo com os alores recebidos
-		double v1 = gastoCombustivel(values[1], values[2], values[3]);
+		double v1 = gastoCombustivel(values[ALTITUDE1], values[], values[3]);
 		int v2 = perigoColisao(0, 0, 0, 0, 0, 0);
 		double v3 = temperaturaMediaInterna(0, 0, 0);
 		double v4 = 1;
@@ -111,5 +97,5 @@ double temperaturaMediaInterna(double t1, double t2, double t3){
 }
 
 double tempoEstimado(double x, double y, double v){
-	return sqrt( (x - y/2)*(x - y/2) + (y - x/3)*(y - x/3) );
+	return (sqrt( (x - y/2)*(x - y/2) + (y - x/3)*(y - x/3)) / v);
 }

@@ -1,7 +1,7 @@
 #include "Latitude.hpp"
 
 Latitude::Latitude(double *time)
-	_time = time;
+	: Sensor(time){
 	_measure = 30;
 		
 }
@@ -13,11 +13,9 @@ double Latitude::readMeasure(){
 	 *	y = sqrt ( radius*2 - x*2 )
 	 * */	
 	
-	
-	if ((*_time) >100)
-		(*_time)=-100;
+	double time = fmod(*_time, 100);
 
-	_measure = sqt( 100 - (*_time)**2  ) + (3-rand()%4); 
+	_measure = sqrt( 100 - (time)*2  ) + (3-rand()%4); 
 
 	return _measure;
 }

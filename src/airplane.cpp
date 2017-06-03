@@ -20,20 +20,20 @@ int main(int argc, char *argv[]){
 	// Criar todos os sensores
 	// Criar todos os sockets (um para cada sensor)
 	ClientSocket *sockets;
-	sockets = (ClientSocket*)malloc(sizeof(ClientSocket) * SENSORS_NUMBER);
+	sockets = (ClientSocket*)malloc(sizeof(ClientSocket) * N_SENSORS);
 	// Conectar cada socket ao servidor na ordem esperada pelo servidor
-	for(int i = 0; i < SENSORS_NUMBER; i++)
+	for(int i = 0; i < N_SENSORS; i++)
 		sockets[i] = ClientSocket(portno, serverName);
 	// Utiliza um for para enviar um numero maximo de mensagens
 	for(int i = 0; i < NUMBER_OF_LOOPS; i++){
 	// 	Recebe uma mensagem do server usando a funcao read (sai do loop caso nao consiga conectar)
 		std::vector<std::thread> threads;
-		char buffer[SENSORS_NUMBER][256];
-		for(int j = 0; j < SENSORS_NUMBER; j++){
+		char buffer[N_SENSORS][256];
+		for(int j = 0; j < N_SENSORS; j++){
 			memset(buffer[j], 0, 256);
 			threads.push_back(std::thread(sockets[j].listenToMessage(buffer[j], 16)));
 		}
-		for(int j = 0; j < SENSORS_NUMBER; j++){
+		for(int j = 0; j < N_SENSORS; j++){
 			threads[j].join();
 			if(buffer[j] == 0) // This is an error
 				exit(1); // Maybe change this to alter a bool variable that exits the loop
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]){
 		time += 0.2;
 	}
 	// Desconecta caso ainda esteja conectado
-	for(int i = 0; i < SENSORS_NUMBER; i++)
+	for(int i = 0; i < N_SENSORS; i++)
 		delete &sockets[i];
 	// Apaga toda a memoria alocada
 	free(sockets);
