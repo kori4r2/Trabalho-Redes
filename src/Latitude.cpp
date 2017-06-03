@@ -14,10 +14,10 @@ double Longitude::readMeasure(){
 	 * */	
 	
 	
-	if ((*_time) >100)
-		(*_time)=-100;
+	if ((*_time) >90)
+		(*_time)=-90;
 
-	_measure = sqt( 100 - (*_time)**2  )+ (3-rand()%4); // circular path with small variation
+	_measure = sqt( 90 - (*_time)**2  )+ (3-rand()%4); // circular path with small variation
 
 	return _measure;
 }
