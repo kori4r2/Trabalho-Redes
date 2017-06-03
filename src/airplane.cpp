@@ -5,6 +5,7 @@ using namespace std;
 
 int main(){
 
+	double time;
 	// Criar todos os sensores
 	// Criar todos os sockets (um para cada sensor)
 	// Conectar cada socket ao servidor na ordem esperada pelo servidor
