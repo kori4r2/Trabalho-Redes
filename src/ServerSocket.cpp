@@ -17,10 +17,14 @@ void ServerSocket::readDouble(double **vectorAddress, int clientIndex, bool *fai
 	}
 }
 
+void ServerSocket::sendBuffer(const void *buffer, std::size_t size, int clientIndex, int *counter){
+	int n = ::sendto(_clientSockets[clientIndex], buffer, size, 0, NULL, 0);
+	if(n > 0)
+		(*counter)++;
+}
+
 void ServerSocket::exitError(const char *message){
 	shutdownServer();
-	if(_buffer)
-		free(_buffer);
 	std::cerr << message << std::endl;
 	exit(1);
 }
@@ -44,20 +48,24 @@ ServerSocket::ServerSocket(int portno, int listenSize)
 	// Initiating variables
 	_portno = portno;
 	// In this particular case the buffer could be only the size of a double
-	_buffer = (char*)malloc(sizeof(char) * 256);
-	memset(&_buffer, 0, sizeof(char) * 256);
 	_clientSockets = NULL;
 	_clientAddresses = NULL;
 	_clientCount = 0;
 
 	// Creates a new socket, binds it and readies it to listen to connections
 	_socketFD = socket(AF_INET, SOCK_STREAM, 0);
+	// In case of failure, exits program
+	if(_socketFD < 0)
+		exitError("Failed to open server socket");
 	memset(&_address, 0, sizeof(_address));
 	_portno = portno;
 	_address.sin_family = AF_INET;
 	_address.sin_addr.s_addr = INADDR_ANY;
 	_address.sin_port = htons(_portno);
-	::bind(_socketFD, (struct sockaddr*)&_address, sizeof(_address));
+	int n = ::bind(_socketFD, (struct sockaddr*)&_address, sizeof(_address));
+	// In case of failure, exits program
+	if(n < 0)
+		exitError("Failed to bind server socket");
 	::listen(_socketFD, listenSize);
 }
 
@@ -79,17 +87,32 @@ void ServerSocket::acceptClient(){
 		_clientAddresses[_clientCount - 1] = newClientAddress;
 	}else{
 		// In case of error, stops execution
-		exitError("Failed to get new client socket");
+		exitError("Failed to accept new client socket");
 	}
 }
 
 int ServerSocket::broadcastMessage(const void *message, std::size_t size){
-	int counting[_clientCount];
-	return 0;
+	int counting[_clientCount], counter;
+	std::vector<std::thread> threads;
+	// Sends the message to all the clients using separate threads
+	for(int i = 0; i < _clientCount; i++){
+		counting[i] = 0;
+		threads.push_back(std::thread(&ServerSocket::sendBuffer, this, message, size, i, &(counting[i])));
+	}
+	// Joins all threads and evaluates which ones successfully sent the message
+	counter = 0;
+	for(int i = 0; i < _clientCount; i++){
+		threads[i].join();
+		counter += counting[i];
+	}
+	// If all messages were successfully sent, returns counter, else returns 0
+	return (counter == _clientCount)? counter : 0;
 }
 
 int ServerSocket::sendMessage(const void *message, std::size_t size, int index){
-	return 0;
+	int counter = 0;
+	sendBuffer(message, size, index, &counter);
+	return counter;
 }
 
 void ServerSocket::listenToClients(double **vectorAddress, int *size){
@@ -102,7 +125,7 @@ void ServerSocket::listenToClients(double **vectorAddress, int *size){
 	std::vector<std::thread> threads;
 	// Start a thread for each message receiving function
 	for(int i = 0; i < _clientCount; i++){
-		threads.push_back(std::thread(&ServerSocket::readDouble, vectorAddress, i, &failure));
+		threads.push_back(std::thread(&ServerSocket::readDouble, this, vectorAddress, i, &failure));
 	}
 	// Wait for all of them to finish
 	for(auto& thread : threads)
@@ -114,5 +137,4 @@ void ServerSocket::listenToClients(double **vectorAddress, int *size){
 
 ServerSocket::~ServerSocket(){
 	shutdownServer();
-	free(_buffer);
 }
