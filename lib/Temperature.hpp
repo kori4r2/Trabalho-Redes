@@ -5,7 +5,7 @@
 using namespace std;
 class Temperature : public Sensor{
 	public:
-		double readMeasure();
+		double readMeasure() override;
 		Temperature(double *time);
 		~Temperature();
 };

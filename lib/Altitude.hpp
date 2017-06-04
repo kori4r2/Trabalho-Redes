@@ -6,7 +6,7 @@
 using namespace std;
 class Altitude : public Sensor{
 	public:
-		double readMeasure();
+		double readMeasure() override;
 		Altitude(double *time);
 		~Altitude();
 };

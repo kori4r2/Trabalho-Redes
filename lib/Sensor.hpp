@@ -10,7 +10,7 @@ class  Sensor {
 		double _measure, *_time;
 	public:
 		virtual double readMeasure()=0;
-		Sensor(double *time);
 		double getMeasure();
+		Sensor(double *time);
 		virtual ~Sensor(); // Must be declared as virtual
 };

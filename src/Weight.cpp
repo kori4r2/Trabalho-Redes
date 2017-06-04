@@ -10,3 +10,6 @@ double Weight::readMeasure(){
 		_measure += ((rand()%100001) - 50000) / 100.0;
 	return _measure;
 }
+
+Weight::~Weight(){
+}

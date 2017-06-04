@@ -9,7 +9,7 @@ class Pressure : public Sensor{
 		double _contactArea;
 		double _force;
 	public:
-		double readMeasure();
+		double readMeasure() override;
 		Pressure(double *time);
 		Pressure(double *time, double contactArea);
 		~Pressure();
