@@ -32,28 +32,34 @@ int main(int argc, char *argv[]){
 	bool allGood = true;
 	for(int i = 0; i < NUMBER_OF_LOOPS && allGood; i++){
 	// 	Recebe uma mensagem do server usando a funcao read (sai do loop caso nao consiga conectar)
-		std::vector<std::thread> threads;
+		std::thread *threads = new thread[N_SENSORS];
 		char buffer[N_SENSORS][256];
 		for(int j = 0; j < N_SENSORS; j++){
 			memset(buffer[j], 0, 256);
-			threads.push_back(std::thread(&ClientSocket::listenToMessage, sockets[j], buffer[j], 16));
+			threads[j] = std::thread(&ClientSocket::listenToMessage, sockets[j], buffer[j], 16);
 		}
+		std::cout << "Waiting for messages from server" << std::endl;
 		for(int j = 0; j < N_SENSORS; j++){
 			threads[j].join();
 			if(buffer[j] == 0) // This is an error
 				allGood = false; // Maybe change this to alter a bool variable that exits the loop
 		}
 		if(allGood){
-			threads.clear();
+			std::cout << "Successfully received messages from server" << std::endl;
+			delete[] threads;
+			threads = new thread[N_SENSORS];
 			// 	Envia os novos valores dos sensores utilizando a funcao write e colocando cada chamada em uma thread
 			for(int j = 0; j < N_SENSORS; j++){
 				double value = sensors[j]->getMeasure();
-				threads.push_back(std::thread(&ClientSocket::sendDouble, sockets[j], value));
+				threads[j] = std::thread(&ClientSocket::sendDouble, sockets[j], value);
 			}
+			std::cout << "Sending values to the server" << std::endl;
 			// 	Da join em todas as threads criadas
 			for(int j = 0; j < N_SENSORS; j++){
 				threads[j].join();
 			}
+			delete[] threads;
+			std::cout << "Successfully sent values to the server" << std::endl;
 			time += 0.4;
 		}
 	}

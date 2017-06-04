@@ -26,16 +26,16 @@ ClientSocket::ClientSocket(int portno, const char *serverName){
 }
 
 int ClientSocket::sendMessage(const void *buffer, std::size_t size){
-	int n = ::sendto(_socketFD, buffer, size, 0, NULL, 0);
+	int n = ::write(_socketFD, buffer, size);
 	return n;
 }
 
 int ClientSocket::sendDouble(const double number){
-	return sendMessage(&number, sizeof(number));
+	return sendMessage(&number, sizeof(double));
 }
 
 int ClientSocket::listenToMessage(void *buffer, std::size_t size){
-	return ::recvfrom(_socketFD, buffer, size, MSG_WAITALL, NULL, 0);
+	return ::read(_socketFD, buffer, size);
 }
 
 ClientSocket::~ClientSocket(){

@@ -28,6 +28,8 @@ int main(int argc, char *argv[]){
 	// Enquanto houver ao menos um socket conectado
 	// Enviar mensagem de inicio checando se foi bem sucedida
 	while(serv->hasClients && (serv->broadcastMessage("send the values", 16) > 0)){
+
+		std::cout << "successfully sent messages" << std::endl;
 		
 		// 	Iniciar um read em cada socket, com cada chamada em uma thread
 		// 	join nas threads criadas

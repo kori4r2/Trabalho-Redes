@@ -6,19 +6,20 @@ void ServerSocket::readDouble(double **vectorAddress, int clientIndex, bool *fai
 		// Clears the current vector position
 		memset(&((*vectorAddress)[clientIndex]), 0, sizeof(double));
 		// Stores the double value received in the current vector position
-		int n = ::recvfrom(_clientSockets[clientIndex], &((*vectorAddress)[clientIndex]), sizeof(double), MSG_WAITALL, NULL, 0);
+		int n = ::read(_clientSockets[clientIndex], (*vectorAddress) + clientIndex, sizeof(double));
 
 		// If it fails to receive message, changes the failure flag
-		if(n < 0){
+		if(n <= 0){
 			// This creates a race condition, but since we just want to detect any failure in any thread
 			// the execution will not be affected by it
+			std::cout << "Failure detected in index " << clientIndex << std::endl;
 			*failure = true;
 		}
 	}
 }
 
 void ServerSocket::sendBuffer(const void *buffer, std::size_t size, int clientIndex, int *counter){
-	int n = ::sendto(_clientSockets[clientIndex], buffer, size, 0, NULL, 0);
+	int n = ::write(_clientSockets[clientIndex], buffer, size);
 	if(n > 0)
 		(*counter)++;
 }
@@ -128,8 +129,8 @@ void ServerSocket::listenToClients(double **vectorAddress, int *size){
 		threads.push_back(std::thread(&ServerSocket::readDouble, this, vectorAddress, i, &failure));
 	}
 	// Wait for all of them to finish
-	for(auto& thread : threads)
-		thread.join();
+	for(int i = 0; i < _clientCount; i++)
+		threads[i].join();
 
 	if(failure)
 		exitError("Error when receiving message from client");
