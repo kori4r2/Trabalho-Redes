@@ -36,7 +36,7 @@ int main(int argc, char *argv[]){
 		char buffer[N_SENSORS][256];
 		for(int j = 0; j < N_SENSORS; j++){
 			memset(buffer[j], 0, 256);
-			threads.push_back(std::thread(sockets[j].listenToMessage(buffer[j], 16)));
+			threads.push_back(std::thread(&ClientSocket::listenToMessage, sockets[j], buffer[j], 16));
 		}
 		for(int j = 0; j < N_SENSORS; j++){
 			threads[j].join();
@@ -47,7 +47,8 @@ int main(int argc, char *argv[]){
 			threads.clear();
 			// 	Envia os novos valores dos sensores utilizando a funcao write e colocando cada chamada em uma thread
 			for(int j = 0; j < N_SENSORS; j++){
-				threads.push_back(std::thread(sockets[j].sendDouble(sensors[j]->readMeasure() )));
+				double value = sensors[j]->getMeasure();
+				threads.push_back(std::thread(&ClientSocket::sendDouble, sockets[j], value));
 			}
 			// 	Da join em todas as threads criadas
 			for(int j = 0; j < N_SENSORS; j++){

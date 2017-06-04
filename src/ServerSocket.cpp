@@ -9,7 +9,7 @@ void ServerSocket::readDouble(double **vectorAddress, int clientIndex, bool *fai
 		int n = ::recvfrom(_clientSockets[clientIndex], &((*vectorAddress)[clientIndex]), sizeof(double), MSG_WAITALL, NULL, 0);
 
 		// If it fails to receive message, changes the failure flag
-		if(n <= 0){
+		if(n < 0){
 			// This creates a race condition, but since we just want to detect any failure in any thread
 			// the execution will not be affected by it
 			*failure = true;

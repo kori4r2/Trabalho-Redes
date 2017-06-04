@@ -38,14 +38,6 @@ int ClientSocket::listenToMessage(void *buffer, std::size_t size){
 	return ::recvfrom(_socketFD, buffer, size, MSG_WAITALL, NULL, 0);
 }
 
-int ClientSocket::listenToMessage(double *number){
-	return listenToMessage(number, sizeof(*number));
-}
-
-int ClientSocket::listenToMessage(char *message){
-	return listenToMessage(message, strlen(message));
-}
-
 ClientSocket::~ClientSocket(){
 	::shutdown(_socketFD, 2);
 }

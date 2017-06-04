@@ -20,7 +20,5 @@ class ClientSocket{
 		int sendMessage(const void *buffer, std::size_t size);
 		int sendDouble(const double number);
 		int listenToMessage(void *buffer, std::size_t size);
-		int listenToMessage(double *number);
-		int listenToMessage(char *message);
 		~ClientSocket();
 };
