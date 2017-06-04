@@ -44,21 +44,22 @@ int main(int argc, char *argv[]){
 			if(buffer[j] == 0) // This is an error
 				allGood = false; // Maybe change this to alter a bool variable that exits the loop
 		}
+		delete[] threads;
 		if(allGood){
 			std::cout << "Successfully received messages from server" << std::endl;
-			delete[] threads;
-			threads = new thread[N_SENSORS];
-			// 	Envia os novos valores dos sensores utilizando a funcao write e colocando cada chamada em uma thread
+			std::thread *otherThreads = new thread[N_SENSORS];
+			// Envia os novos valores dos sensores utilizando a funcao write e colocando cada chamada em uma thread
 			for(int j = 0; j < N_SENSORS; j++){
 				double value = sensors[j]->getMeasure();
-				threads[j] = std::thread(&ClientSocket::sendDouble, sockets[j], value);
+				bcopy(&value, buffer[0], sizeof(double));
+				otherThreads[j] = std::thread(&ClientSocket::sendMessage, sockets[j], buffer[0], sizeof(double));
 			}
 			std::cout << "Sending values to the server" << std::endl;
-			// 	Da join em todas as threads criadas
+			// Da join em todas as threads criadas
 			for(int j = 0; j < N_SENSORS; j++){
-				threads[j].join();
+				otherThreads[j].join();
 			}
-			delete[] threads;
+			delete[] otherThreads;
 			std::cout << "Successfully sent values to the server" << std::endl;
 			time += 0.4;
 		}

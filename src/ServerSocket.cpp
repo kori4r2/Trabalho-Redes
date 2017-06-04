@@ -6,7 +6,9 @@ void ServerSocket::readDouble(double **vectorAddress, int clientIndex, bool *fai
 		// Clears the current vector position
 		memset(&((*vectorAddress)[clientIndex]), 0, sizeof(double));
 		// Stores the double value received in the current vector position
-		int n = ::read(_clientSockets[clientIndex], (*vectorAddress) + clientIndex, sizeof(double));
+		char *buffer[256];
+		int n = ::read(_clientSockets[clientIndex], buffer, sizeof(double));
+		bcopy(buffer, (*vectorAddress) + clientIndex, sizeof(double));
 
 		// If it fails to receive message, changes the failure flag
 		if(n <= 0){
