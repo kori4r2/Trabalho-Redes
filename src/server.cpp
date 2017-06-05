@@ -8,11 +8,14 @@ double gastoCombustivel(double altura, double velocidade, double peso);
 int perigoColisao(double xA, double yA, double zA, double xB, double yB, double zB);
 double temperaturaMediaInterna(double t1, double t2, double t3);
 double tempoEstimado(double x, double y, double v);
+void getSensorUpdate();
 
 int main(int argc, char *argv[]){
 
-	double *values = NULL;
-	int size, portno;
+	double *values = new double[N_SENSORS];
+	int portno;
+	bool allGood = true;
+	std::thread *threads = new thread[N_SENSORS];
 
 	std::cout << "Select the port number" << std::endl;
 	scanf("%d", &portno);
@@ -24,24 +27,21 @@ int main(int argc, char *argv[]){
 	for(int i = 0; i < N_SENSORS; i++){
 		serv->acceptClient();
 	}
+	for(int i = 0; i < N_SENSORS; i++){
+		values[i] = 0.0;
+		threads[i] = std::thread(&ServerSocket::updateClientDouble, serv, &values, i, &allGood);
+	}
 
 	// Enquanto houver ao menos um socket conectado
-	// Enviar mensagem de inicio checando se foi bem sucedida
-	while(serv->hasClients && (serv->broadcastMessage("send the values", 16) > 0)){
+	while(serv->hasClients && allGood){
 
-		std::cout << "successfully sent messages" << std::endl;
-		
-		// 	Iniciar um read em cada socket, com cada chamada em uma thread
-		// 	join nas threads criadas
-		serv->listenToClients(&values, &size);
-
-		// 	Calcular sensores virtuais de acordo com os alores recebidos
+		// Calcular sensores virtuais de acordo com os valores recebidos
 		double v1 = gastoCombustivel(values[ALTITUDE1], values[SPEED], values[WEIGHT]);
 		int v2 = perigoColisao(values[LATITUDE1], values[LONGITUDE1], values[ALTITUDE1], values[LATITUDE2], values[LONGITUDE2], values[ALTITUDE2]);
 		double v3 = temperaturaMediaInterna(values[TEMPERATURE1], values[TEMPERATURE2], values[TEMPERATURE3]);
 		double v4 = tempoEstimado(values[LATITUDE1], values[LONGITUDE1], values[SPEED]);
 
-		// 	Exibir as informacoes na tela
+		// Exibir as informacoes na tela
 		std::cout << "============================================" << std::endl;
 		std::cout << "Combustivel gasto por hora: " << v1 << std::endl;
 		std::cout << "Perigo de colisao com aeronave B: ";
@@ -56,6 +56,8 @@ int main(int argc, char *argv[]){
 
 	// Apaga toda a memoria alocada
 	delete serv;
+	delete[] values;
+	delete[] threads;
 
 	return 0;
 

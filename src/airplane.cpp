@@ -6,6 +6,8 @@
 
 #define NUMBER_OF_LOOPS 2000
 
+void checkFinish(bool*);
+
 int main(int argc, char *argv[]){
 
 
@@ -28,42 +30,31 @@ int main(int argc, char *argv[]){
 	// Conectar cada socket ao servidor na ordem esperada pelo servidor
 	for(int i = 0; i < N_SENSORS; i++)
 		sockets[i] = ClientSocket(portno, serverName);
+
 	// Utiliza um for para enviar um numero maximo de mensagens
 	bool allGood = true;
-	for(int i = 0; i < NUMBER_OF_LOOPS && allGood; i++){
-	// 	Recebe uma mensagem do server usando a funcao read (sai do loop caso nao consiga conectar)
-		std::thread *threads = new thread[N_SENSORS];
-		char buffer[N_SENSORS][256];
-		for(int j = 0; j < N_SENSORS; j++){
-			memset(buffer[j], 0, 256);
-			threads[j] = std::thread(&ClientSocket::listenToMessage, sockets[j], buffer[j], 16);
-		}
-		std::cout << "Waiting for messages from server" << std::endl;
-		for(int j = 0; j < N_SENSORS; j++){
-			threads[j].join();
-			if(buffer[j] == 0) // This is an error
-				allGood = false; // Maybe change this to alter a bool variable that exits the loop
-		}
-		delete[] threads;
-		if(allGood){
-			std::cout << "Successfully received messages from server" << std::endl;
-			std::thread *otherThreads = new thread[N_SENSORS];
-			// Envia os novos valores dos sensores utilizando a funcao write e colocando cada chamada em uma thread
-			for(int j = 0; j < N_SENSORS; j++){
-				double value = sensors[j]->getMeasure();
-				bcopy(&value, buffer[0], sizeof(double));
-				otherThreads[j] = std::thread(&ClientSocket::sendMessage, sockets[j], buffer[0], sizeof(double));
-			}
-			std::cout << "Sending values to the server" << std::endl;
-			// Da join em todas as threads criadas
-			for(int j = 0; j < N_SENSORS; j++){
-				otherThreads[j].join();
-			}
-			delete[] otherThreads;
-			std::cout << "Successfully sent values to the server" << std::endl;
-			time += 0.4;
-		}
+	double values[N_SENSORS];
+	std::thread *threads = new thread[N_SENSORS];
+
+	for(int j = 0; j < N_SENSORS; j++){
+		values[j] = 0;
+		threads[j] = std::thread(&ClientSocket::keepSendingMessage, sockets[j], &(values[j]), sizeof(double), &allGood);
 	}
+	std::thread readingInput = thread(checkFinish, &allGood);
+
+	double startTime = std::time(NULL);
+	while(allGood){
+	// 	Recebe uma mensagem do server usando a funcao read (sai do loop caso nao consiga conectar)
+		// Envia os novos valores dos sensores utilizando a funcao write e colocando cada chamada em uma thread
+		time = std::time(NULL) - startTime;
+		for(int i = 0; i < N_SENSORS; i++)
+			sensors[i]->getMeasure();
+	}
+	for(int i = 0; i < N_SENSORS; i++)
+		threads[i].join();
+	delete[] threads;
+	readingInput.join();
+
 	// Desconecta caso ainda esteja conectado
 	for(int i = 0; i < N_SENSORS; i++)
 		delete &sockets[i];
@@ -73,4 +64,14 @@ int main(int argc, char *argv[]){
 	free(sensors);
 	
 	return 0;
+}
+
+void checkFinish(bool *allGood){
+	char input[256];
+	while(strcmp(input, "quit") != 0 && *allGood){
+		std::cout << "type 'quit' to stop running: ";
+		scanf("%s", input);
+		input[255] = '\0';
+	}
+	(*allGood) = false;
 }

@@ -10,7 +10,7 @@ void ClientSocket::exitError(const char *message){
 
 ClientSocket::ClientSocket(int portno, const char *serverName){
 	_portno = portno;
-	_socketFD = socket(AF_INET, SOCK_STREAM, 0);
+	_socketFD = socket(AF_INET, SOCK_DGRAM, 0);
 	if(_socketFD < 0)
 		exitError("Error creating client socket");
 	_server = ::gethostbyname(serverName);
@@ -23,6 +23,12 @@ ClientSocket::ClientSocket(int portno, const char *serverName){
 	int n = ::connect(_socketFD, (struct sockaddr *)&_serverAddress, sizeof(_serverAddress));
 	if(n < 0)
 		exitError("Error connecting to server");
+}
+
+void ClientSocket::keepSendingMessage(void *buffer, std::size_t size, bool *allGood){
+	while(*allGood){
+		sendMessage(buffer, size);
+	}
 }
 
 int ClientSocket::sendMessage(const void *buffer, std::size_t size){

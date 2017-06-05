@@ -50,7 +50,6 @@ ServerSocket::ServerSocket(int portno, int listenSize)
 
 	// Initiating variables
 	_portno = portno;
-	// In this particular case the buffer could be only the size of a double
 	_clientSockets = NULL;
 	_clientAddresses = NULL;
 	_clientCount = 0;
@@ -116,6 +115,10 @@ int ServerSocket::sendMessage(const void *message, std::size_t size, int index){
 	int counter = 0;
 	sendBuffer(message, size, index, &counter);
 	return counter;
+}
+
+void ServerSocket::updateClientDouble(double **vectorAddress, int index, bool *failure){
+	readDouble(vectorAddress, index, failure);
 }
 
 void ServerSocket::listenToClients(double **vectorAddress, int *size){

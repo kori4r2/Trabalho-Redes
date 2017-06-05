@@ -43,6 +43,8 @@ class ServerSocket{
 		// parameter and stores the vector size on the location pointed by the second parameter
 		void listenToClients(double **vectorAddress, int *size);
 
+		void updateClientDouble(double **vectorAddress, int index, bool *failure);
+
 		// Class destructor
 		~ServerSocket();
 };
