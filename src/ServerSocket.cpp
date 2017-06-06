@@ -7,13 +7,13 @@ void ServerSocket::exitError(const char *message){
 }
 
 void ServerSocket::shutdownServer(){
-	// Closes all sockets
+	// Sends shutdown message to all clients saved
 	for(int j = 0; j < 5; j++){
 		for(int i = 0; i < _clientCount; i++){
 			::sendto(_socketFD, "shutdown\0", 9 * sizeof(char), 0, (struct sockaddr*)&_clientAddresses[i], sizeof(_clientAddresses[i]));
 		}
 	}
-	_hasClients = false;
+	// Closes server socket
 	::shutdown(_socketFD, 2);
 	// Frees allocated memory for the vectors
 	free(_clientAddresses);
@@ -23,7 +23,7 @@ void ServerSocket::shutdownServer(){
 }
 
 ServerSocket::ServerSocket(int portno, int listenSize, int nSensors)
-	// Sets up the reference for _hasClients variable
+	// Sets up the reference for _clientCount variable
 	: clientCount(_clientCount){
 
 	// Initiating variables
@@ -33,7 +33,7 @@ ServerSocket::ServerSocket(int portno, int listenSize, int nSensors)
 	_values = NULL;
 	_clientCount = 0;
 
-	// Creates a new socket, binds it and readies it to listen to connections
+	// Creates a new socket, binds it and readies it to listen to connections without blocking
 	_socketFD = socket(AF_INET, SOCK_DGRAM, 0);
 	::fcntl(_socketFD, F_SETFL, O_NONBLOCK);
 	// In case of failure, exits program
@@ -54,21 +54,23 @@ ServerSocket::ServerSocket(int portno, int listenSize, int nSensors)
 void ServerSocket::listenToClients(bool *allGood){
 	while(*allGood){
 		char buffer[256];
-		struct sockaddr_in clientAddress = sockaddr_in();
-		socklen_t length = socklen_t();
+		struct sockaddr_in clientAddress/* = sockaddr_in()*/;
+		socklen_t sockLength/* = socklen_t()*/;
 		bool isNewClient = true;
 		int clientPos = _clientCount;
 
-		int n = ::recvfrom(_socketFD, (void*)buffer, 256 * sizeof(char), 0, (struct sockaddr*)&clientAddress, &length);
-		
+		// Listen to socket
+		int n = ::recvfrom(_socketFD, (void*)buffer, 256 * sizeof(char), 0, (struct sockaddr*)&clientAddress, &sockLength);
+		// If a message was successfully received
 		if(n > 0){
+			// Checks if the client that sent the message is a new one
 			for(int i = 0; i < _clientCount && isNewClient; i++){
-				if(_clientAddresses[i].sin_addr.s_addr == clientAddress.sin_addr.s_addr && _clientAddresses[i].sin_port == clientAddress.sin_port){
+				if(_clientAddresses[i].sin_addr.s_addr == clientAddress.sin_addr.s_addr/* && _clientAddresses[i].sin_port == clientAddress.sin_port*/){
 					isNewClient = false;
 					clientPos = i;
 				}
 			}
-
+			// If it is a new client, stores their info and creates a new value vector for them
 			if(!isNewClient){
 				_clientCount++;
 				_clientAddresses = (struct sockaddr_in*)realloc(_clientAddresses, sizeof(struct sockaddr_in) * _clientCount);
@@ -76,7 +78,7 @@ void ServerSocket::listenToClients(bool *allGood){
 				_values = (double**)realloc(_values, sizeof(double*) * _clientCount);
 				_values[_clientCount - 1] = (double*)calloc(_nSensors, sizeof(double));
 			}
-
+			// Copies the info to the correct position inside the vector
 			unsigned char index;
 			double value;
 			memcpy(&index, buffer, sizeof(unsigned char));

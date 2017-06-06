@@ -19,22 +19,24 @@ int main(int argc, char *argv[]){
 	std::cout << "Select the port number" << std::endl;
 	scanf("%d", &portno);
 
-	// Criar lista de sockets em ordem pre-definida (1 socket para cada sensor)
+	// Creates the server socket
 	ServerSocket *serv = new ServerSocket(portno, 5, N_SENSORS);
 
+	// Creates a thread for listening to client messages and a thread for reading the standard input
 	std::thread listenThread = std::thread(&ServerSocket::listenToClients, serv, &allGood);
 	std::thread inputThread = std::thread(checkFinish, &allGood);
-	// Enquanto houver ao menos um socket conectado
 	std::cout << "Type \"q\" to halt execution" << std::endl;
+	// Loops while the user has not input the necessary command
 	while(allGood){
+		// Loops through all clients(airplanes) of the server
 		for(int i = 0; i < serv->clientCount; i++){
-			// Calcular sensores virtuais de acordo com os valores recebidos
+			// Updates the virtual sensors according to the new values inside the vectors
 			double v1 = gastoCombustivel(serv->values[i][ALTITUDE1], serv->values[i][SPEED], serv->values[i][WEIGHT]);
 			int v2 = perigoColisao(serv->values[i][LATITUDE1], serv->values[i][LONGITUDE1], serv->values[i][ALTITUDE1], serv->values[i][LATITUDE2], serv->values[i][LONGITUDE2], serv->values[i][ALTITUDE2]);
 			double v3 = temperaturaMediaInterna(serv->values[i][TEMPERATURE1], serv->values[i][TEMPERATURE2], serv->values[i][TEMPERATURE3]);
 			double v4 = tempoEstimado(serv->values[i][LATITUDE1], serv->values[i][LONGITUDE1], serv->values[i][SPEED]);
 
-			// Exibir as informacoes na tela
+			// Shows information of the airplane on the screen
 			std::cout << "============================================" << std::endl;
 			std::cout << "Aeronave numero " << i << std::endl;
 			std::cout << "Combustivel gasto por hora: " << v1 << std::endl;
@@ -47,13 +49,15 @@ int main(int argc, char *argv[]){
 			std::cout << "Tempo estimado de chegada: " << v4 << std::endl;
 			std::cout << "============================================" << std::endl;
 		}
+		// If at least one client has connected, makes sure the exit instruction is at the end
 		if(serv->clientCount > 0)
 			std::cout << "Type \"q\" to halt execution" << std::endl;
 	}
+	// Stops both threads
 	inputThread.join();
 	listenThread.join();
 
-	// Apaga toda a memoria alocada
+	// Frees allocated memory
 	delete serv;
 
 	return 0;
