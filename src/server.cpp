@@ -25,7 +25,7 @@ int main(int argc, char *argv[]){
 	std::thread listenThread = std::thread(&ServerSocket::listenToClients, serv, &allGood);
 	std::thread inputThread = std::thread(checkFinish, &allGood);
 	// Enquanto houver ao menos um socket conectado
-	std::cout << "Digite \"q\" para encerrar execução" << std::endl;
+	std::cout << "Type \"q\" to halt execution" << std::endl;
 	while(allGood){
 		for(int i = 0; i < serv->clientCount; i++){
 			// Calcular sensores virtuais de acordo com os valores recebidos
@@ -48,7 +48,7 @@ int main(int argc, char *argv[]){
 			std::cout << "============================================" << std::endl;
 		}
 		if(serv->clientCount > 0)
-			std::cout << "Digite \"q\" para encerrar execução" << std::endl;
+			std::cout << "Type \"q\" to halt execution" << std::endl;
 	}
 	inputThread.join();
 	listenThread.join();

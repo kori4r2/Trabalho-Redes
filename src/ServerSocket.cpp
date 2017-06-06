@@ -54,8 +54,8 @@ ServerSocket::ServerSocket(int portno, int listenSize, int nSensors)
 void ServerSocket::listenToClients(bool *allGood){
 	while(*allGood){
 		char buffer[256];
-		struct sockaddr_in clientAddress;
-		socklen_t length;
+		struct sockaddr_in clientAddress = sockaddr_in();
+		socklen_t length = socklen_t();
 		bool isNewClient = true;
 		int clientPos = _clientCount;
 
