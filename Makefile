@@ -18,10 +18,10 @@ all : build
 
 build : $(BINDIR) buildClient buildServer
 
-buildServer : $(SERVEROBJS)
+buildServer : $(BINDIR) $(SERVEROBJS)
 	$(CC) $(LINKFLAGS) -o $(SERVER) $(SERVEROBJS)
 
-buildClient : $(CLIENTOBJS)
+buildClient : $(BINDIR) $(CLIENTOBJS)
 	$(CC) $(LINKFLAGS) -o $(CLIENT) $(CLIENTOBJS)
 
 $(DEBUGDIR) :

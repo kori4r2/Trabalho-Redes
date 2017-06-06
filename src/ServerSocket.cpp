@@ -10,7 +10,7 @@ void ServerSocket::shutdownServer(){
 	// Closes all sockets
 	for(int j = 0; j < 5; j++){
 		for(int i = 0; i < _clientCount; i++){
-			::sendto(_socketFD, "shutdown", 8 * sizeof(char), 0, (struct sockaddr*)&_clientAddresses[i], sizeof(_clientAddresses[i]));
+			::sendto(_socketFD, "shutdown\0", 9 * sizeof(char), 0, (struct sockaddr*)&_clientAddresses[i], sizeof(_clientAddresses[i]));
 		}
 	}
 	_hasClients = false;

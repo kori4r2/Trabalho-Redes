@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 class ClientSocket{
 	private:
@@ -23,5 +24,6 @@ class ClientSocket{
 		int sendMessage(const void *buffer, std::size_t size);
 		int sendDouble(const double number);
 		int listenToMessage(void *buffer, std::size_t size);
+		void getServerShutdown(bool *allGood);
 		~ClientSocket();
 };

@@ -25,18 +25,21 @@ int main(int argc, char *argv[]){
 	::initalizeSensors(sensors, &time);
 
 	// Criar todos os sockets (um para cada sensor)
-	ClientSocket *sockets;
-	sockets = (ClientSocket*)malloc(sizeof(ClientSocket) * N_SENSORS);
+	ClientSocket **sockets;
+	sockets = (ClientSocket**)malloc(sizeof(ClientSocket*) * N_SENSORS);
 
 	bool allGood = true;
 	double values[N_SENSORS];
 	std::thread *threads = new thread[N_SENSORS];
+	std::thread *checkServerShutdown = new thread[N_SENSORS];
 
 	for(int j = 0; j < N_SENSORS; j++){
+		sockets[j] = new ClientSocket(portno, serverName);
 		values[j] = 0;
-		threads[j] = std::thread(&ClientSocket::keepSendingMessage, sockets[j], &(values[j]), j, sizeof(double), &allGood);
+		threads[j] = std::thread(&ClientSocket::keepSendingMessage, (*sockets[j]), &(values[j]), j, sizeof(double), &allGood);
+		checkServerShutdown[j] = std::thread(&ClientSocket::getServerShutdown, (*sockets[j]), &allGood);
 	}
-	std::thread readingInput = thread(checkFinish, &allGood);
+	std::thread readingInput = std::thread(checkFinish, &allGood);
 
 	double startTime = std::time(NULL);
 	while(allGood){
@@ -44,14 +47,17 @@ int main(int argc, char *argv[]){
 		for(int i = 0; i < N_SENSORS; i++)
 			values[i] = sensors[i]->getMeasure();
 	}
-	for(int i = 0; i < N_SENSORS; i++)
+	for(int i = 0; i < N_SENSORS; i++){
 		threads[i].join();
+		checkServerShutdown[i].join();
+	}
 	delete[] threads;
+	delete[] checkServerShutdown;
 	readingInput.join();
 
 	// Desconecta caso ainda esteja conectado
 	for(int i = 0; i < N_SENSORS; i++)
-		delete &sockets[i];
+		delete sockets[i];
 	// Apaga toda a memoria alocada
 	free(sockets);
 	::deleteSensors(sensors);
