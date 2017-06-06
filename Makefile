@@ -2,6 +2,7 @@ CFLAGS = -g -Wall -std=c++11
 LINKFLAGS = -pthread -std=c++11
 PROJECT = Redes
 CC = g++
+DEBUGDIR = tests
 BINDIR = bin
 SRCDIR = src
 LIBDIR = lib
@@ -23,6 +24,9 @@ buildServer : $(SERVEROBJS)
 buildClient : $(CLIENTOBJS)
 	$(CC) $(LINKFLAGS) -o $(CLIENT) $(CLIENTOBJS)
 
+$(DEBUGDIR) :
+	mkdir -p $(DEBUGDIR)
+
 $(BINDIR) :
 	mkdir -p $(BINDIR)
 
@@ -30,7 +34,8 @@ $(BINDIR)/%.o : $(SRCDIR)/%.cpp $(LIBS)
 	$(CC) -c $< -I $(LIBDIR) $(CFLAGS) -o $@
 
 clean :
-	rm -f $(BINDIR)/*.o
+	rm -rf $(BINDIR)
+	rm -rf $(DEBUGDIR)
 	rm -f $(PROJECT).zip
 	rm -f $(PROJECT)
 	rm -f $(SERVER)
@@ -49,13 +54,9 @@ run : server
 .zip : clean
 	zip $(PROJECT).zip $(SRCS) $(LIBS) Makefile *.pdf Authors.txt
 
-debug : all
-#	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(PROJECT) < tests/dataset_6_10.txt > tests/output_6_10.txt 2> debug_10.txt
-#	diff tests/output_6_10.txt tests/result_6_10_2.txt
-#	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(PROJECT) < tests/dataset_6_20.txt > tests/output_6_20.txt 2> debug_20.txt
-#	diff tests/output_6_20.txt tests/result_6_20_2.txt
-#	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(PROJECT) < tests/dataset_6_50.txt > tests/output_6_50.txt 2> debug_50.txt
-#	diff tests/output_6_50.txt tests/result_6_50_2.txt
-#	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(PROJECT) < tests/dataset_6_100.txt > tests/output_6_100.txt 2> debug_100.txt
-#	diff tests/output_6_100.txt tests/result_6_100_2.txt
+debugServer: $(DEBUGDIR) all
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(SERVER) > $(DEBUGDIR)/serverOutput.txt 2> $(DEBUGDIR)/serverError.txt
+
+debugClient: $(DEBUGDIR) all
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(CLIENT) > $(DEBUGDIR)/clientOutput.txt 2> $(DEBUGDIR)/clientError.txt
 

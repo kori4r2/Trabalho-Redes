@@ -9,25 +9,26 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 class ServerSocket{
 	private:
-		int _socketFD, _portno, _clientCount, *_clientSockets;
+		int _socketFD, _portno, _clientCount, _nSensors;
 		struct sockaddr_in _address, *_clientAddresses;
 		bool _hasClients;
+		double **_values;
 
-		void readDouble(double **vectorAddress, int clientIndex, bool *failure);
-		void sendBuffer(const void *buffer, std::size_t size, int clientIndex, int *counter);
 		void exitError(const char *message);
 		void shutdownServer();
 
 	public:
 		// Indicates whether there are clients connected (can only be accessed for reading)
-		const bool &hasClients;
+		const int &clientCount;
+		const double **values;
 
 
 		// Class constructor, receives port number and listen queue size as parameters
-		ServerSocket(int portno, int listenSize);
+		ServerSocket(int portno, int listenSize, int nSensors);
 
 		// Waits until a new client connects and saves it to the list of connected clients
 		void acceptClient();
@@ -41,7 +42,7 @@ class ServerSocket{
 
 		// Receives a double from each client conected, saves them to the vector pointed by the furst
 		// parameter and stores the vector size on the location pointed by the second parameter
-		void listenToClients(double **vectorAddress, int *size);
+		void listenToClients(bool *allGood);
 
 		void updateClientDouble(double **vectorAddress, int index, bool *failure);
 

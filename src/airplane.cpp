@@ -14,9 +14,9 @@ int main(int argc, char *argv[]){
 	double time = 0.0;
 	int portno;
 	char serverName[256];
-	std::cout << "type the server port number" << std::endl;
+	std::cout << "type the server port number: ";
 	scanf("%d", &portno);
-	std::cout << "type the server machine name" << std::endl;
+	std::cout << "type the server machine name: ";
 	scanf("%s", serverName);
 
 	// Criar todos os sensores
@@ -27,28 +27,22 @@ int main(int argc, char *argv[]){
 	// Criar todos os sockets (um para cada sensor)
 	ClientSocket *sockets;
 	sockets = (ClientSocket*)malloc(sizeof(ClientSocket) * N_SENSORS);
-	// Conectar cada socket ao servidor na ordem esperada pelo servidor
-	for(int i = 0; i < N_SENSORS; i++)
-		sockets[i] = ClientSocket(portno, serverName);
 
-	// Utiliza um for para enviar um numero maximo de mensagens
 	bool allGood = true;
 	double values[N_SENSORS];
 	std::thread *threads = new thread[N_SENSORS];
 
 	for(int j = 0; j < N_SENSORS; j++){
 		values[j] = 0;
-		threads[j] = std::thread(&ClientSocket::keepSendingMessage, sockets[j], &(values[j]), sizeof(double), &allGood);
+		threads[j] = std::thread(&ClientSocket::keepSendingMessage, sockets[j], &(values[j]), j, sizeof(double), &allGood);
 	}
 	std::thread readingInput = thread(checkFinish, &allGood);
 
 	double startTime = std::time(NULL);
 	while(allGood){
-	// 	Recebe uma mensagem do server usando a funcao read (sai do loop caso nao consiga conectar)
-		// Envia os novos valores dos sensores utilizando a funcao write e colocando cada chamada em uma thread
 		time = std::time(NULL) - startTime;
 		for(int i = 0; i < N_SENSORS; i++)
-			sensors[i]->getMeasure();
+			values[i] = sensors[i]->getMeasure();
 	}
 	for(int i = 0; i < N_SENSORS; i++)
 		threads[i].join();
@@ -68,10 +62,10 @@ int main(int argc, char *argv[]){
 
 void checkFinish(bool *allGood){
 	char input[256];
-	while(strcmp(input, "quit") != 0 && *allGood){
-		std::cout << "type 'quit' to stop running: ";
+	do{
+		std::cout << "type 'q' to stop running: ";
 		scanf("%s", input);
 		input[255] = '\0';
-	}
+	}while(strcmp(input, "q") != 0 && *allGood);
 	(*allGood) = false;
 }

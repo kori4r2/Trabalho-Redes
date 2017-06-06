@@ -3,6 +3,7 @@
 #include <math.h>
 #include "SensorManager.hpp"
 
+void checkFinish(bool *allGood);
 void error(const char *msg);
 double gastoCombustivel(double altura, double velocidade, double peso);
 int perigoColisao(double xA, double yA, double zA, double xB, double yB, double zB);
@@ -12,55 +13,60 @@ void getSensorUpdate();
 
 int main(int argc, char *argv[]){
 
-	double *values = new double[N_SENSORS];
 	int portno;
 	bool allGood = true;
-	std::thread *threads = new thread[N_SENSORS];
 
 	std::cout << "Select the port number" << std::endl;
 	scanf("%d", &portno);
 
 	// Criar lista de sockets em ordem pre-definida (1 socket para cada sensor)
-	ServerSocket *serv = new ServerSocket(portno, N_SENSORS);
+	ServerSocket *serv = new ServerSocket(portno, 5, N_SENSORS);
 
-	// Conectar todos os sockets, em ordem
-	for(int i = 0; i < N_SENSORS; i++){
-		serv->acceptClient();
-	}
-	for(int i = 0; i < N_SENSORS; i++){
-		values[i] = 0.0;
-		threads[i] = std::thread(&ServerSocket::updateClientDouble, serv, &values, i, &allGood);
-	}
-
+	std::thread listenThread = std::thread(&ServerSocket::listenToClients, serv, &allGood);
+	std::thread inputThread = std::thread(checkFinish, &allGood);
 	// Enquanto houver ao menos um socket conectado
-	while(serv->hasClients && allGood){
+	std::cout << "Digite \"q\" para encerrar execução" << std::endl;
+	while(allGood){
+		for(int i = 0; i < serv->clientCount; i++){
+			// Calcular sensores virtuais de acordo com os valores recebidos
+			double v1 = gastoCombustivel(serv->values[i][ALTITUDE1], serv->values[i][SPEED], serv->values[i][WEIGHT]);
+			int v2 = perigoColisao(serv->values[i][LATITUDE1], serv->values[i][LONGITUDE1], serv->values[i][ALTITUDE1], serv->values[i][LATITUDE2], serv->values[i][LONGITUDE2], serv->values[i][ALTITUDE2]);
+			double v3 = temperaturaMediaInterna(serv->values[i][TEMPERATURE1], serv->values[i][TEMPERATURE2], serv->values[i][TEMPERATURE3]);
+			double v4 = tempoEstimado(serv->values[i][LATITUDE1], serv->values[i][LONGITUDE1], serv->values[i][SPEED]);
 
-		// Calcular sensores virtuais de acordo com os valores recebidos
-		double v1 = gastoCombustivel(values[ALTITUDE1], values[SPEED], values[WEIGHT]);
-		int v2 = perigoColisao(values[LATITUDE1], values[LONGITUDE1], values[ALTITUDE1], values[LATITUDE2], values[LONGITUDE2], values[ALTITUDE2]);
-		double v3 = temperaturaMediaInterna(values[TEMPERATURE1], values[TEMPERATURE2], values[TEMPERATURE3]);
-		double v4 = tempoEstimado(values[LATITUDE1], values[LONGITUDE1], values[SPEED]);
-
-		// Exibir as informacoes na tela
-		std::cout << "============================================" << std::endl;
-		std::cout << "Combustivel gasto por hora: " << v1 << std::endl;
-		std::cout << "Perigo de colisao com aeronave B: ";
-		if(v2 == 0)
-			std::cout << "Nao" << std::endl;
-		else
-			std::cout << "Sim" << std::endl;
-		std::cout << "Temperatura media interna: " << v3 << std::endl;
-		std::cout << "Tempo estimado de chegada: " << v4 << std::endl;
-		std::cout << "============================================" << std::endl;
+			// Exibir as informacoes na tela
+			std::cout << "============================================" << std::endl;
+			std::cout << "Aeronave numero " << i << std::endl;
+			std::cout << "Combustivel gasto por hora: " << v1 << std::endl;
+			std::cout << "Perigo de colisao com aeronave B: ";
+			if(v2 == 0)
+				std::cout << "Nao" << std::endl;
+			else
+				std::cout << "Sim" << std::endl;
+			std::cout << "Temperatura media interna: " << v3 << std::endl;
+			std::cout << "Tempo estimado de chegada: " << v4 << std::endl;
+			std::cout << "============================================" << std::endl;
+		}
+		if(serv->clientCount > 0)
+			std::cout << "Digite \"q\" para encerrar execução" << std::endl;
 	}
+	inputThread.join();
+	listenThread.join();
 
 	// Apaga toda a memoria alocada
 	delete serv;
-	delete[] values;
-	delete[] threads;
 
 	return 0;
 
+}
+
+void checkFinish(bool *allGood){
+	char input[256];
+	do{
+		scanf("%s", input);
+		input[255] = '\0';
+	}while(strcmp(input, "q") != 0 && *allGood);
+	(*allGood) = false;
 }
 
 void error(const char *msg){

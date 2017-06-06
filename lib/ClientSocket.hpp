@@ -19,7 +19,7 @@ class ClientSocket{
 		void exitError(const char *message);
 	public:
 		ClientSocket(int portno, const char *serverName);
-		void keepSendingMessage(void *buffer, std::size_t size, bool *allGood);
+		void keepSendingMessage(void *buffer, unsigned char index, std::size_t size, bool *allGood);
 		int sendMessage(const void *buffer, std::size_t size);
 		int sendDouble(const double number);
 		int listenToMessage(void *buffer, std::size_t size);

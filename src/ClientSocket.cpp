@@ -18,16 +18,19 @@ ClientSocket::ClientSocket(int portno, const char *serverName){
 		exitError("Error getting host info");
 	memset(&_serverAddress, 0, sizeof(_serverAddress));
 	_serverAddress.sin_family = AF_INET;
-	bcopy(_server->h_addr, &_serverAddress.sin_addr.s_addr, _server->h_length);
+	memcpy(&_serverAddress.sin_addr.s_addr, _server->h_addr, _server->h_length);
 	_serverAddress.sin_port = htons(_portno);
-	int n = ::connect(_socketFD, (struct sockaddr *)&_serverAddress, sizeof(_serverAddress));
-	if(n < 0)
-		exitError("Error connecting to server");
+//	int n = ::connect(_socketFD, (struct sockaddr *)&_serverAddress, sizeof(_serverAddress));
+//	if(n < 0)
+//		exitError("Error connecting to server");
 }
 
-void ClientSocket::keepSendingMessage(void *buffer, std::size_t size, bool *allGood){
+void ClientSocket::keepSendingMessage(void *buffer, unsigned char index, std::size_t size, bool *allGood){
+	void *newBuffer = malloc(sizeof(unsigned char) + size);
+	memcpy(newBuffer, &index, sizeof(unsigned char));
+	memcpy( ((unsigned char*)newBuffer) + 1, buffer, size);
 	while(*allGood){
-		sendMessage(buffer, size);
+		sendMessage(newBuffer, sizeof(unsigned char) + size);
 	}
 }
 
