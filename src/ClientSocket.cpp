@@ -51,7 +51,7 @@ void ClientSocket::keepSendingMessage(void *buffer, unsigned char index, std::si
 	memcpy( ((unsigned char*)newBuffer) + 1, buffer, size);
 	// While nothing is wrong, send the buffer info to the server
 	while(*allGood){
-		if((index) == 1)
+//		if((index) == 1)
 			std::cout << "sending index = " << (int)index << "double = " << *((double*)buffer) << std::endl;
 		sendMessage(newBuffer, sizeof(unsigned char) + size);
 	}

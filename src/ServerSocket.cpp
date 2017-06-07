@@ -105,8 +105,8 @@ void ServerSocket::listenToClients(bool *allGood){
 			memcpy(&index, buffer, sizeof(unsigned char));
 			memcpy(&value, ((unsigned char*)buffer) + 1, sizeof(double));
 			if(index >= 0 && index < _nSensors){
-				if((int)index == 1)
-					std::cout << "saved " << value << " to pos (" << clientPos << ", " << (int)index << ")" << std::endl;
+//				if((int)index == 1)
+//					std::cout << "saved " << value << " to pos (" << clientPos << ", " << (int)index << ")" << std::endl;
 				_values[clientPos][(int)index] = value;
 			}
 		}

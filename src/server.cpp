@@ -57,7 +57,7 @@ int main(int argc, char *argv[]){
 		// If at least one client has connected, makes sure the exit instruction is at the end
 		if(serv->clientCount > 0){
 			output << "Type \"q\" to halt execution\n";
-//			fprintf(stdout, "%s", output.str().c_str());
+			fprintf(stdout, "%s", output.str().c_str());
 		}
 	}
 	// Stops both threads
