@@ -40,7 +40,7 @@ int main(int argc, char *argv[]){
 		// saves an initial value to the vector
 		values[j] = 0;
 		// Starts a thread to keep sending the contents of that vector position to the server
-		threads[j] = std::thread(&ClientSocket::keepSendingMessage, std::ref(*sockets[j]), &(values[j]), j, sizeof(double), &allGood);
+		threads[j] = std::thread(&ClientSocket::keepSendingMessage, std::ref(*sockets[j]), &(values[j]), j, &allGood);
 		// Starts a thread to keep waiting for a shutdown message from the server
 		checkServerShutdown[j] = std::thread(&ClientSocket::getServerShutdown, std::ref(*sockets[j]), &allGood);
 	}
@@ -51,8 +51,9 @@ int main(int argc, char *argv[]){
 	double startTime = std::time(NULL);
 	while(allGood){
 		time = std::time(NULL) - startTime;
-		for(int i = 0; i < N_SENSORS; i++)
+		for(int i = 0; i < N_SENSORS; i++){
 			values[i] = sensors[i]->getMeasure();
+		}
 	}
 	// Joins all threads created
 	for(int i = 0; i < N_SENSORS; i++){

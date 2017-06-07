@@ -1,0 +1,69 @@
+==5361== Memcheck, a memory error detector
+==5361== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
+==5361== Using Valgrind-3.12.0 and LibVEX; rerun with -h for copyright info
+==5361== Command: ./airplane
+==5361== 
+==5361== Thread 2:
+==5361== Invalid free() / delete / delete[] / realloc()
+==5361==    at 0x4C2C64B: operator delete(void*) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5361==    by 0x401E20: ClientSocket::keepSendingMessage(double*, unsigned char, bool*) (ClientSocket.cpp:57)
+==5361==    by 0x405362: void std::__invoke_impl<void, void (ClientSocket::* const&)(double*, unsigned char, bool*), std::reference_wrapper<ClientSocket>, double*, int, bool*>(std::__invoke_memfun_ref, void (ClientSocket::* const&)(double*, unsigned char, bool*), std::reference_wrapper<ClientSocket>&&, double*&&, int&&, bool*&&) (functional:218)
+==5361==    by 0x405217: std::result_of<void (ClientSocket::* const&(std::reference_wrapper<ClientSocket>&&, double*&&, int&&, bool*&&))(double*, unsigned char, bool*)>::type std::__invoke<void (ClientSocket::* const&)(double*, unsigned char, bool*), std::reference_wrapper<ClientSocket>, double*, int, bool*>(void (ClientSocket::* const&)(double*, unsigned char, bool*), std::reference_wrapper<ClientSocket>&&, double*&&, int&&, bool*&&) (functional:251)
+==5361==    by 0x405103: decltype (__invoke((*this)._M_pmf, (forward<std::reference_wrapper<ClientSocket> >)({parm#1}), (forward<double*>)({parm#1}), (forward<int>)({parm#1}), (forward<bool*>)({parm#1}))) std::_Mem_fn_base<void (ClientSocket::*)(double*, unsigned char, bool*), true>::operator()<std::reference_wrapper<ClientSocket>, double*, int, bool*>(std::reference_wrapper<ClientSocket>&&, double*&&, int&&, bool*&&) const (functional:604)
+==5361==    by 0x405038: void std::_Bind_simple<std::_Mem_fn<void (ClientSocket::*)(double*, unsigned char, bool*)> (std::reference_wrapper<ClientSocket>, double*, int, bool*)>::_M_invoke<0ul, 1ul, 2ul, 3ul>(std::_Index_tuple<0ul, 1ul, 2ul, 3ul>) (functional:1391)
+==5361==    by 0x404CE2: std::_Bind_simple<std::_Mem_fn<void (ClientSocket::*)(double*, unsigned char, bool*)> (std::reference_wrapper<ClientSocket>, double*, int, bool*)>::operator()() (functional:1380)
+==5361==    by 0x404C79: std::thread::_State_impl<std::_Bind_simple<std::_Mem_fn<void (ClientSocket::*)(double*, unsigned char, bool*)> (std::reference_wrapper<ClientSocket>, double*, int, bool*)> >::_M_run() (thread:197)
+==5361==    by 0x4EF258E: execute_native_thread_routine (thread.cc:83)
+==5361==    by 0x56F02E6: start_thread (in /usr/lib/libpthread-2.25.so)
+==5361==    by 0x59F354E: clone (in /usr/lib/libc-2.25.so)
+==5361==  Address 0x5d23a00 is 352 bytes inside a block of size 513 alloc'd
+==5361==    at 0x4C2B58F: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5361==    by 0x4F5B364: std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::reserve(unsigned long) (basic_string.tcc:293)
+==5361==    by 0x4F4EC2D: std::__cxx11::basic_stringbuf<char, std::char_traits<char>, std::allocator<char> >::overflow(int) (sstream.tcc:114)
+==5361==    by 0x4F59748: std::basic_streambuf<char, std::char_traits<char> >::xsputn(char const*, long) (streambuf.tcc:98)
+==5361==    by 0x4F3E52C: sputn (streambuf:451)
+==5361==    by 0x4F3E52C: _M_put (streambuf_iterator.h:282)
+==5361==    by 0x4F3E52C: __write<char> (locale_facets.h:121)
+==5361==    by 0x4F3E52C: std::ostreambuf_iterator<char, std::char_traits<char> > std::num_put<char, std::ostreambuf_iterator<char, std::char_traits<char> > >::_M_insert_float<double>(std::ostreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, char, char, double) const (locale_facets.tcc:1100)
+==5361==    by 0x4F3E75F: std::num_put<char, std::ostreambuf_iterator<char, std::char_traits<char> > >::do_put(std::ostreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, char, double) const (locale_facets.tcc:1159)
+==5361==    by 0x4F4AD34: put (locale_facets.h:2434)
+==5361==    by 0x4F4AD34: std::ostream& std::ostream::_M_insert<double>(double) (ostream.tcc:73)
+==5361==    by 0x401DCA: ClientSocket::keepSendingMessage(double*, unsigned char, bool*) (ClientSocket.cpp:54)
+==5361==    by 0x405362: void std::__invoke_impl<void, void (ClientSocket::* const&)(double*, unsigned char, bool*), std::reference_wrapper<ClientSocket>, double*, int, bool*>(std::__invoke_memfun_ref, void (ClientSocket::* const&)(double*, unsigned char, bool*), std::reference_wrapper<ClientSocket>&&, double*&&, int&&, bool*&&) (functional:218)
+==5361==    by 0x405217: std::result_of<void (ClientSocket::* const&(std::reference_wrapper<ClientSocket>&&, double*&&, int&&, bool*&&))(double*, unsigned char, bool*)>::type std::__invoke<void (ClientSocket::* const&)(double*, unsigned char, bool*), std::reference_wrapper<ClientSocket>, double*, int, bool*>(void (ClientSocket::* const&)(double*, unsigned char, bool*), std::reference_wrapper<ClientSocket>&&, double*&&, int&&, bool*&&) (functional:251)
+==5361==    by 0x405103: decltype (__invoke((*this)._M_pmf, (forward<std::reference_wrapper<ClientSocket> >)({parm#1}), (forward<double*>)({parm#1}), (forward<int>)({parm#1}), (forward<bool*>)({parm#1}))) std::_Mem_fn_base<void (ClientSocket::*)(double*, unsigned char, bool*), true>::operator()<std::reference_wrapper<ClientSocket>, double*, int, bool*>(std::reference_wrapper<ClientSocket>&&, double*&&, int&&, bool*&&) const (functional:604)
+==5361==    by 0x405038: void std::_Bind_simple<std::_Mem_fn<void (ClientSocket::*)(double*, unsigned char, bool*)> (std::reference_wrapper<ClientSocket>, double*, int, bool*)>::_M_invoke<0ul, 1ul, 2ul, 3ul>(std::_Index_tuple<0ul, 1ul, 2ul, 3ul>) (functional:1391)
+==5361== 
+==5361== 
+==5361== HEAP SUMMARY:
+==5361==     in use at exit: 58,524 bytes in 3,226 blocks
+==5361==   total heap usage: 23,200 allocs, 23,200 frees, 10,386,336 bytes allocated
+==5361== 
+==5361== Thread 1:
+==5361== 58,524 bytes in 3,226 blocks are definitely lost in loss record 1 of 1
+==5361==    at 0x4C2B58F: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5361==    by 0x4F4DC6C: void std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct<char*>(char*, char*, std::forward_iterator_tag) [clone .isra.83] (basic_string.tcc:219)
+==5361==    by 0x4F52106: _M_construct_aux<char*> (basic_string.h:196)
+==5361==    by 0x4F52106: _M_construct<char*> (basic_string.h:215)
+==5361==    by 0x4F52106: basic_string<char*> (basic_string.h:552)
+==5361==    by 0x4F52106: str (sstream:173)
+==5361==    by 0x4F52106: std::__cxx11::basic_ostringstream<char, std::char_traits<char>, std::allocator<char> >::str() const (sstream:625)
+==5361==    by 0x401DF6: ClientSocket::keepSendingMessage(double*, unsigned char, bool*) (ClientSocket.cpp:57)
+==5361==    by 0x405362: void std::__invoke_impl<void, void (ClientSocket::* const&)(double*, unsigned char, bool*), std::reference_wrapper<ClientSocket>, double*, int, bool*>(std::__invoke_memfun_ref, void (ClientSocket::* const&)(double*, unsigned char, bool*), std::reference_wrapper<ClientSocket>&&, double*&&, int&&, bool*&&) (functional:218)
+==5361==    by 0x405217: std::result_of<void (ClientSocket::* const&(std::reference_wrapper<ClientSocket>&&, double*&&, int&&, bool*&&))(double*, unsigned char, bool*)>::type std::__invoke<void (ClientSocket::* const&)(double*, unsigned char, bool*), std::reference_wrapper<ClientSocket>, double*, int, bool*>(void (ClientSocket::* const&)(double*, unsigned char, bool*), std::reference_wrapper<ClientSocket>&&, double*&&, int&&, bool*&&) (functional:251)
+==5361==    by 0x405103: decltype (__invoke((*this)._M_pmf, (forward<std::reference_wrapper<ClientSocket> >)({parm#1}), (forward<double*>)({parm#1}), (forward<int>)({parm#1}), (forward<bool*>)({parm#1}))) std::_Mem_fn_base<void (ClientSocket::*)(double*, unsigned char, bool*), true>::operator()<std::reference_wrapper<ClientSocket>, double*, int, bool*>(std::reference_wrapper<ClientSocket>&&, double*&&, int&&, bool*&&) const (functional:604)
+==5361==    by 0x405038: void std::_Bind_simple<std::_Mem_fn<void (ClientSocket::*)(double*, unsigned char, bool*)> (std::reference_wrapper<ClientSocket>, double*, int, bool*)>::_M_invoke<0ul, 1ul, 2ul, 3ul>(std::_Index_tuple<0ul, 1ul, 2ul, 3ul>) (functional:1391)
+==5361==    by 0x404CE2: std::_Bind_simple<std::_Mem_fn<void (ClientSocket::*)(double*, unsigned char, bool*)> (std::reference_wrapper<ClientSocket>, double*, int, bool*)>::operator()() (functional:1380)
+==5361==    by 0x404C79: std::thread::_State_impl<std::_Bind_simple<std::_Mem_fn<void (ClientSocket::*)(double*, unsigned char, bool*)> (std::reference_wrapper<ClientSocket>, double*, int, bool*)> >::_M_run() (thread:197)
+==5361==    by 0x4EF258E: execute_native_thread_routine (thread.cc:83)
+==5361==    by 0x56F02E6: start_thread (in /usr/lib/libpthread-2.25.so)
+==5361== 
+==5361== LEAK SUMMARY:
+==5361==    definitely lost: 58,524 bytes in 3,226 blocks
+==5361==    indirectly lost: 0 bytes in 0 blocks
+==5361==      possibly lost: 0 bytes in 0 blocks
+==5361==    still reachable: 0 bytes in 0 blocks
+==5361==         suppressed: 0 bytes in 0 blocks
+==5361== 
+==5361== For counts of detected and suppressed errors, rerun with: -v
+==5361== ERROR SUMMARY: 3227 errors from 2 contexts (suppressed: 0 from 0)

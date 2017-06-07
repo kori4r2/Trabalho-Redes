@@ -2,7 +2,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <iomanip>
 #include <cstring>
+#include <sstream>
 #include <cstdlib>
 #include <functional>
 #include <sys/types.h>
@@ -22,7 +24,7 @@ class ClientSocket{
 		void exitError(const char *message);
 	public:
 		ClientSocket(int portno, const char *serverName);
-		void keepSendingMessage(void *buffer, unsigned char index, std::size_t size, bool *allGood);
+		void keepSendingMessage(double *number, unsigned char index, bool *allGood);
 		int sendMessage(const void *buffer, std::size_t size);
 		int listenToMessage(void *buffer, std::size_t size);
 		void getServerShutdown(bool *allGood);

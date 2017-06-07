@@ -10,7 +10,7 @@ double Altitude::readMeasure(){
 	// altitude = (x)*(x-10e6)  -> altitude = 0  <-> ocean 
 	// 			    -> altitude 500**2 <-> meters from ocean 
 	
-	_measure = (*_time)*((*_time)-10e6) + (10-rand()%11);
+	_measure = (*_time)*((*_time)+0.01*10e6) + (10-rand()%11);
 
 	return _measure;
 }

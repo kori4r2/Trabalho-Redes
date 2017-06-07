@@ -3,7 +3,7 @@
 #include<iostream>
 #include<cmath>
 
-#define TIME_SPEED 100
+#define TIME_SPEED 1
 
 using namespace std;
 

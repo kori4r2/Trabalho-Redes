@@ -89,7 +89,7 @@ double gastoCombustivel(double altura, double velocidade, double peso){
 	//Note that this constant value doesn't reflect the reallity.
 	double c = 24;
 
-	return c * ((velocidade*peso)/altura);
+	return c * ((velocidade*velocidade*peso)/altura);
 }
 
 int perigoColisao(double xA, double yA, double zA, double xB, double yB, double zB){

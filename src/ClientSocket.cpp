@@ -43,17 +43,22 @@ ClientSocket::ClientSocket(int portno, const char *serverName){
 	callNumber++;
 }
 
-void ClientSocket::keepSendingMessage(void *buffer, unsigned char index, std::size_t size, bool *allGood){
+void ClientSocket::keepSendingMessage(double *number, unsigned char index, bool *allGood){
 	// Allocates memory for the buffer
-	void *newBuffer = malloc(sizeof(unsigned char) + size);
+	void *newBuffer = malloc(sizeof(unsigned char) + (255 * sizeof(char)));
 	// Copies the relevant info
 	memcpy(newBuffer, &index, sizeof(unsigned char));
-	memcpy( ((unsigned char*)newBuffer) + 1, buffer, size);
 	// While nothing is wrong, send the buffer info to the server
 	while(*allGood){
-//		if((index) == 1)
-			std::cout << "sending index = " << (int)index << "double = " << *((double*)buffer) << std::endl;
-		sendMessage(newBuffer, sizeof(unsigned char) + size);
+		std::ostringstream strStream;
+		strStream << std::fixed << std::setprecision(6) << *number;
+		char buffer[256];
+		memset(buffer, 0, sizeof(char) * 255);
+		strcpy(buffer, strStream.str().c_str());
+		memcpy( ((unsigned char*)newBuffer) + 1, buffer, 255 * sizeof(char));
+		if((index) == 10)
+			std::cout << "sending index = " << (int)index << "double = " << buffer << std::endl;
+		sendMessage(newBuffer, sizeof(unsigned char) + (255 * sizeof(char)));
 	}
 	free(newBuffer);
 }

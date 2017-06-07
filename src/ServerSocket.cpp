@@ -102,11 +102,13 @@ void ServerSocket::listenToClients(bool *allGood){
 			// Copies the info to the correct position inside the vector
 			unsigned char index;
 			double value;
+			char numberBuffer[255];
 			memcpy(&index, buffer, sizeof(unsigned char));
-			memcpy(&value, ((unsigned char*)buffer) + 1, sizeof(double));
+			memcpy(numberBuffer, buffer + 1, 255 * sizeof(char));
+			value = atof(numberBuffer);
 			if(index >= 0 && index < _nSensors){
-//				if((int)index == 1)
-//					std::cout << "saved " << value << " to pos (" << clientPos << ", " << (int)index << ")" << std::endl;
+//				if((int)index == 10)
+//					std::cout << "saved " << value << "(" << numberBuffer << ")" << " to pos (" << clientPos << ", " << (int)index << ")" << std::endl;
 				_values[clientPos][(int)index] = value;
 			}
 		}
