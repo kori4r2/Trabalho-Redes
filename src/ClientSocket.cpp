@@ -2,6 +2,7 @@
 
 void ClientSocket::exitError(const char *message){
 
+	::freeaddrinfo(_serverCandidates);
 	::shutdown(_socketFD, 2);
 	
 	std::cerr << message << std::endl;
@@ -11,25 +12,35 @@ void ClientSocket::exitError(const char *message){
 ClientSocket::ClientSocket(int portno, const char *serverName){
 	// Stores server info and creates client socket
 	_portno = portno;
-	_socketFD = socket(AF_INET, SOCK_DGRAM, 0);
-	if(_socketFD < 0)
-		exitError("Error creating client socket");
-	::fcntl(_socketFD, F_SETFL, O_NONBLOCK);
 	// Gets a reference to the server
-	_server = ::gethostbyname(serverName);
-	if(_server == NULL)
+
+	struct addrinfo hints;
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_DGRAM;
+	hints.ai_protocol = 0;
+	hints.ai_flags = AI_NUMERICSERV;
+	
+	char portStr[256];
+	snprintf(portStr, 256, "%d", _portno);
+	int n =::getaddrinfo(serverName, portStr, &hints, &_serverCandidates);
+	if(n != 0)
 		exitError("Error getting host info");
-//	memset(&_serverAddress, 0, sizeof(_serverAddress));
-	_serverAddress.sin_family = AF_INET;
-	memcpy(&_serverAddress.sin_addr.s_addr, _server->h_addr, _server->h_length);
-	_serverAddress.sin_port = htons(_portno);
-	// Binds the socket to an address
-	_address.sin_family = AF_INET;
-	_address.sin_addr.s_addr = htonl(INADDR_ANY);
-	_address.sin_port = htons(0);
-	if(::bind(_socketFD, (struct sockaddr*)&_address, sizeof(_address)) < 0){
-		exitError("Error binding socket");
+	static int callNumber = 0;
+	std::cout << "socket number" << callNumber << "------------------------------" << std::endl;
+	_server = NULL;
+	_socketFD = -1;
+	for(_server = _serverCandidates; _server != NULL && _socketFD < 0; _server = _server->ai_next){
+		char aux[256];
+		std::cout << "server address: " << ::inet_ntop(_server->ai_family, _server->ai_addr->sa_data, aux, 256 * sizeof(char)) << std::endl;
+		_socketFD = socket(_server->ai_family, _server->ai_socktype, _server->ai_protocol);
 	}
+	std::cout << "-----------------------------------------------" << std::endl;
+	if(_socketFD >= 0)
+		::fcntl(_socketFD, F_SETFL, O_NONBLOCK);
+	if(_server == NULL)
+		exitError("Error creating client socket");
+	callNumber++;
 }
 
 void ClientSocket::keepSendingMessage(void *buffer, unsigned char index, std::size_t size, bool *allGood){
@@ -40,15 +51,16 @@ void ClientSocket::keepSendingMessage(void *buffer, unsigned char index, std::si
 	memcpy( ((unsigned char*)newBuffer) + 1, buffer, size);
 	// While nothing is wrong, send the buffer info to the server
 	while(*allGood){
-		if(sendMessage(newBuffer, sizeof(unsigned char) + size) > 0)
-			std::cout << "something was sent" << std::endl;
+		if((index) == 1)
+			std::cout << "sending index = " << (int)index << "double = " << *((double*)buffer) << std::endl;
+		sendMessage(newBuffer, sizeof(unsigned char) + size);
 	}
 	free(newBuffer);
 }
 
 // Sends a message to the saved server address
 int ClientSocket::sendMessage(const void *buffer, std::size_t size){
-	return ::sendto(_socketFD, buffer, size, 0, (struct sockaddr*)&_serverAddress, _server->h_length);
+	return ::sendto(_socketFD, buffer, size, 0, _server->ai_addr, _server->ai_addrlen);
 }
 
 // Receives messages
@@ -65,5 +77,6 @@ void ClientSocket::getServerShutdown(bool *allGood){
 }
 
 ClientSocket::~ClientSocket(){
+	::freeaddrinfo(_serverCandidates);
 	::shutdown(_socketFD, 2);
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
@@ -10,12 +11,13 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <arpa/inet.h>
 
 class ClientSocket{
 	private:
 		int _socketFD, _portno;
-		struct sockaddr_in _address, _serverAddress;
-		struct hostent *_server;
+//		struct sockaddr_in _address, _serverAddress;
+		struct addrinfo *_serverCandidates, *_server;
 
 		void exitError(const char *message);
 	public:

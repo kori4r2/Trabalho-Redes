@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "SensorManager.hpp"
+#include <sstream>
 
 void checkFinish(bool *allGood);
 void error(const char *msg);
@@ -23,35 +24,41 @@ int main(int argc, char *argv[]){
 	ServerSocket *serv = new ServerSocket(portno, 5, N_SENSORS);
 
 	// Creates a thread for listening to client messages and a thread for reading the standard input
-	std::thread listenThread = std::thread(&ServerSocket::listenToClients, serv, &allGood);
+	std::thread listenThread = std::thread(&ServerSocket::listenToClients, std::ref(*serv), &allGood);
 	std::thread inputThread = std::thread(checkFinish, &allGood);
+	std::cout << std::string(60, '\n') << std::endl;
 	std::cout << "Type \"q\" to halt execution" << std::endl;
 	// Loops while the user has not input the necessary command
 	while(allGood){
 		// Loops through all clients(airplanes) of the server
-		for(int i = 0; i < serv->clientCount; i++){
+		int current = serv->clientCount;
+		std::ostringstream output;
+		for(int i = 0; i < current; i++){
 			// Updates the virtual sensors according to the new values inside the vectors
-			double v1 = gastoCombustivel(serv->values[i][ALTITUDE1], serv->values[i][SPEED], serv->values[i][WEIGHT]);
-			int v2 = perigoColisao(serv->values[i][LATITUDE1], serv->values[i][LONGITUDE1], serv->values[i][ALTITUDE1], serv->values[i][LATITUDE2], serv->values[i][LONGITUDE2], serv->values[i][ALTITUDE2]);
-			double v3 = temperaturaMediaInterna(serv->values[i][TEMPERATURE1], serv->values[i][TEMPERATURE2], serv->values[i][TEMPERATURE3]);
-			double v4 = tempoEstimado(serv->values[i][LATITUDE1], serv->values[i][LONGITUDE1], serv->values[i][SPEED]);
+			double v1 = gastoCombustivel(serv->getValue(i, ALTITUDE1), serv->getValue(i, SPEED), serv->getValue(i, WEIGHT));
+			int v2 = perigoColisao(serv->getValue(i, LATITUDE1), serv->getValue(i, LONGITUDE1), serv->getValue(i, ALTITUDE1), serv->getValue(i, LATITUDE2), serv->getValue(i, LONGITUDE2), serv->getValue(i, ALTITUDE2));
+			double v3 = temperaturaMediaInterna(serv->getValue(i, TEMPERATURE1), serv->getValue(i, TEMPERATURE2), serv->getValue(i, TEMPERATURE3));
+			double v4 = tempoEstimado(serv->getValue(i, LATITUDE1), serv->getValue(i, LONGITUDE1), serv->getValue(i, SPEED));
 
 			// Shows information of the airplane on the screen
-			std::cout << "============================================" << std::endl;
-			std::cout << "Aeronave numero " << i << std::endl;
-			std::cout << "Combustivel gasto por hora: " << v1 << std::endl;
-			std::cout << "Perigo de colisao com aeronave B: ";
+			output << std::string("\r\x1B[A\x1B[A\x1B[A\x1B[A\x1B[A\x1B[A\x1B[A\x1B[A");
+			output << "============================================\n";
+			output << "Aeronave numero " << i << "\n";
+			output << "Combustivel gasto por hora: " << v1 << "           \n";
+			output << "Perigo de colisao com aeronave B: ";
 			if(v2 == 0)
-				std::cout << "Nao" << std::endl;
+				output << "Nao\n";
 			else
-				std::cout << "Sim" << std::endl;
-			std::cout << "Temperatura media interna: " << v3 << std::endl;
-			std::cout << "Tempo estimado de chegada: " << v4 << std::endl;
-			std::cout << "============================================" << std::endl;
+				output << "Sim\n";
+			output << "Temperatura media interna: " << v3 << "            \n";
+			output << "Tempo estimado de chegada: " << v4 << "            \n";
+			output << "============================================\n";
 		}
 		// If at least one client has connected, makes sure the exit instruction is at the end
-		if(serv->clientCount > 0)
-			std::cout << "Type \"q\" to halt execution" << std::endl;
+		if(serv->clientCount > 0){
+			output << "Type \"q\" to halt execution\n";
+//			fprintf(stdout, "%s", output.str().c_str());
+		}
 	}
 	// Stops both threads
 	inputThread.join();

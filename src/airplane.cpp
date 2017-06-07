@@ -24,7 +24,7 @@ int main(int argc, char *argv[]){
 
 	// Criar todos os sockets (um para cada sensor)
 	ClientSocket **sockets;
-	sockets = (ClientSocket**)malloc(sizeof(ClientSocket*) * N_SENSORS);
+	sockets = new ClientSocket*[N_SENSORS];
 
 	bool allGood = true;
 	double values[N_SENSORS];
@@ -40,9 +40,9 @@ int main(int argc, char *argv[]){
 		// saves an initial value to the vector
 		values[j] = 0;
 		// Starts a thread to keep sending the contents of that vector position to the server
-		threads[j] = std::thread(&ClientSocket::keepSendingMessage, (*sockets[j]), &(values[j]), j, sizeof(double), &allGood);
+		threads[j] = std::thread(&ClientSocket::keepSendingMessage, std::ref(*sockets[j]), &(values[j]), j, sizeof(double), &allGood);
 		// Starts a thread to keep waiting for a shutdown message from the server
-		checkServerShutdown[j] = std::thread(&ClientSocket::getServerShutdown, (*sockets[j]), &allGood);
+		checkServerShutdown[j] = std::thread(&ClientSocket::getServerShutdown, std::ref(*sockets[j]), &allGood);
 	}
 	// Starts a thread to read the se if user closes through standard input
 	std::thread readingInput = std::thread(checkFinish, &allGood);
@@ -60,12 +60,12 @@ int main(int argc, char *argv[]){
 		checkServerShutdown[i].join();
 	}
 	readingInput.join();
-	// Frees all allocated memorie
-	delete[] threads;
-	delete[] checkServerShutdown;
+	// Frees all allocated memory
 	for(int i = 0; i < N_SENSORS; i++)
 		delete sockets[i];
-	free(sockets);
+	delete[] sockets;
+	delete[] threads;
+	delete[] checkServerShutdown;
 	::deleteSensors(sensors);
 	free(sensors);
 	

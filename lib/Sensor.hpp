@@ -3,6 +3,8 @@
 #include<iostream>
 #include<cmath>
 
+#define TIME_SPEED 100
+
 using namespace std;
 
 class  Sensor {
