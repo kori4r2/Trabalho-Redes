@@ -7,10 +7,10 @@ void ServerSocket::exitError(const char *message){
 }
 
 void ServerSocket::shutdownServer(){
-	// Sends shutdown message to all clients saved
+	// Sends shutdown message to all clients saved (Does not seem to work)
 	for(int j = 0; j < 5; j++){
 		for(int i = 0; i < _clientCount; i++){
-			::sendto(_socketFD, "shutdown\0", 9 * sizeof(char), 0, &_clientAddresses[i], 14 * sizeof(char));
+			::sendto(_socketFD, "shutdown", 9 * sizeof(char), 0, &_clientAddresses[i], 14 * sizeof(char));
 		}
 	}
 	// Closes server socket
@@ -35,6 +35,9 @@ ServerSocket::ServerSocket(int portno, int listenSize, int nSensors)
 	_clientCount = 0;
 
 	// Creates a new socket, binds it and readies it to listen to connections without blocking
+	// hints is used to determine how the server address will be configured on the call to getaddrinfo():
+	// any valid protocol; datagram socket; any address family; allows the use of listen;
+	// port information will be passed as a number;
 	struct addrinfo hints;
 	::memset(&hints, 0, sizeof(hints));
 	hints.ai_protocol = 0;
@@ -44,14 +47,18 @@ ServerSocket::ServerSocket(int portno, int listenSize, int nSensors)
 	char portStr[256];
 	memset(portStr, 0, 256 * sizeof(char));
 	snprintf(portStr, 256, "%d", _portno);
+	// If it fails, exits with error message
 	int n = ::getaddrinfo(NULL, portStr, &hints, &_address);
 	if(n != 0)
 		exitError("Falied to assign IP address");
+	// Creates the socket for the server
 	_socketFD = socket(_address->ai_family, _address->ai_socktype, _address->ai_protocol);
 	// In case of failure, exits program
 	if(_socketFD < 0)
 		exitError("Failed to open server socket");
+	// Makes sure the call to listen will not block execution
 	::fcntl(_socketFD, F_SETFL, O_NONBLOCK);
+	// And binds the socket so it can start listening
 	n = ::bind(_socketFD, _address->ai_addr, _address->ai_addrlen);
 	// In case of failure, exits program
 	if(n < 0)
@@ -63,6 +70,7 @@ ServerSocket::ServerSocket(int portno, int listenSize, int nSensors)
 }
 
 double ServerSocket::getValue(int client, int index){
+	// returns desired value when parameters are valid, 0 when not
 	if(client >= 0 && client < _clientCount && index >= 0 && index < _nSensors)
 		return _values[client][index];
 	else
@@ -71,6 +79,7 @@ double ServerSocket::getValue(int client, int index){
 
 void ServerSocket::listenToClients(bool *allGood){
 	while(*allGood){
+		// Declaration and initialization of necessary variables
 		char buffer[256];
 		memset(buffer, 0, 256 * sizeof(char));
 		struct sockaddr clientAddress = sockaddr();
@@ -78,7 +87,7 @@ void ServerSocket::listenToClients(bool *allGood){
 		bool isNewClient = true;
 		int clientPos = _clientCount;
 
-		// Listen to socket
+		// Try to receive a message from socket
 		int n = ::recvfrom(_socketFD, (void*)buffer, 256 * sizeof(char), 0, &clientAddress, &sockLength);
 		// If a message was successfully received
 		if(n > 0){
@@ -102,15 +111,13 @@ void ServerSocket::listenToClients(bool *allGood){
 			// Copies the info to the correct position inside the vector
 			unsigned char index;
 			double value;
+			// The number is converted back from string format to be stored
 			char numberBuffer[255];
 			memcpy(&index, buffer, sizeof(unsigned char));
 			memcpy(numberBuffer, buffer + 1, 255 * sizeof(char));
 			value = atof(numberBuffer);
-			if(index >= 0 && index < _nSensors){
-//				if((int)index == 10)
-//					std::cout << "saved " << value << "(" << numberBuffer << ")" << " to pos (" << clientPos << ", " << (int)index << ")" << std::endl;
+			if(index >= 0 && index < _nSensors)
 				_values[clientPos][(int)index] = value;
-			}
 		}
 	}
 }

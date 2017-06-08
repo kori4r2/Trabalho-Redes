@@ -4,10 +4,12 @@ Speed::Speed(double *time)
 	: Sensor(time){
 	_measure = 0.0;
 	_factor = 5.0;
-	_lastTime = *_time;
+	_lastTime = -1.0;
 }
 
 double Speed::readMeasure(){
+	if(_lastTime == -1.0)
+		_lastTime = *_time;
 	_measure += _factor * (*_time - _lastTime);
 	_lastTime = *_time;
 	if(_measure > MAX_SPEED)

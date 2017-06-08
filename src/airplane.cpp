@@ -2,7 +2,6 @@
 #include "ClientSocket.hpp"
 #include <cstdio>
 #include <thread>
-#include <vector>
 
 void checkFinish(bool*);
 
@@ -17,12 +16,12 @@ int main(int argc, char *argv[]){
 	std::cout << "type the server machine name: ";
 	scanf("%s", serverName);
 
-	// Criar todos os sensores
+	// Creates and initializes the sensors
 	Sensor **sensors;
 	sensors = (Sensor**)malloc(sizeof(Sensor) * N_SENSORS);
 	::initalizeSensors(sensors, &time);
 
-	// Criar todos os sockets (um para cada sensor)
+	// Creates all sockets (one for each sensor)
 	ClientSocket **sockets;
 	sockets = new ClientSocket*[N_SENSORS];
 
@@ -38,13 +37,13 @@ int main(int argc, char *argv[]){
 		// Creates a new client socket
 		sockets[j] = new ClientSocket(portno, serverName);
 		// saves an initial value to the vector
-		values[j] = 0;
+		values[j] = 0.0;
 		// Starts a thread to keep sending the contents of that vector position to the server
 		threads[j] = std::thread(&ClientSocket::keepSendingMessage, std::ref(*sockets[j]), &(values[j]), j, &allGood);
 		// Starts a thread to keep waiting for a shutdown message from the server
 		checkServerShutdown[j] = std::thread(&ClientSocket::getServerShutdown, std::ref(*sockets[j]), &allGood);
 	}
-	// Starts a thread to read the se if user closes through standard input
+	// Starts a thread to see if user closes through standard input
 	std::thread readingInput = std::thread(checkFinish, &allGood);
 
 	// While the program is still running, updates the values inside the vector
@@ -55,6 +54,7 @@ int main(int argc, char *argv[]){
 			values[i] = sensors[i]->getMeasure();
 		}
 	}
+
 	// Joins all threads created
 	for(int i = 0; i < N_SENSORS; i++){
 		threads[i].join();

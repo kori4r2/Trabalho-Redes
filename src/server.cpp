@@ -3,6 +3,7 @@
 #include <math.h>
 #include "SensorManager.hpp"
 #include <sstream>
+#include <thread>
 
 void checkFinish(bool *allGood);
 void error(const char *msg);
@@ -31,16 +32,15 @@ int main(int argc, char *argv[]){
 	// Loops while the user has not input the necessary command
 	while(allGood){
 		// Loops through all clients(airplanes) of the server
-		int current = serv->clientCount;
 		std::ostringstream output;
-		for(int i = 0; i < current; i++){
+		for(int i = 0; i < serv->clientCount; i++){
 			// Updates the virtual sensors according to the new values inside the vectors
 			double v1 = gastoCombustivel(serv->getValue(i, ALTITUDE1), serv->getValue(i, SPEED), serv->getValue(i, WEIGHT));
 			int v2 = perigoColisao(serv->getValue(i, LATITUDE1), serv->getValue(i, LONGITUDE1), serv->getValue(i, ALTITUDE1), serv->getValue(i, LATITUDE2), serv->getValue(i, LONGITUDE2), serv->getValue(i, ALTITUDE2));
 			double v3 = temperaturaMediaInterna(serv->getValue(i, TEMPERATURE1), serv->getValue(i, TEMPERATURE2), serv->getValue(i, TEMPERATURE3));
 			double v4 = tempoEstimado(serv->getValue(i, LATITUDE1), serv->getValue(i, LONGITUDE1), serv->getValue(i, SPEED));
 
-			// Shows information of the airplane on the screen
+			// Shows information of the airplane on the screen, replacing the previous info
 			output << std::string("\r\x1B[A\x1B[A\x1B[A\x1B[A\x1B[A\x1B[A\x1B[A\x1B[A");
 			output << "============================================\n";
 			output << "Aeronave numero " << i << "\n";
